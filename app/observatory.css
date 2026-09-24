@@ -288,9 +288,10 @@
   line-height: 1;
 }
 .floating-reading strong small {
-  font: 10px Arial;
-  letter-spacing: 0;
+  font: 11px 'Inter', sans-serif;
+  letter-spacing: normal;
   color: var(--muted);
+  margin-left: 4px;
 }
 .floating-reading p {
   font: 9px monospace;
