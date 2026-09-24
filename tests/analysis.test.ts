@@ -215,7 +215,7 @@ test("one failed feed preserves the other feeds; all-down summary is explicit", 
 });
 
 test("a successful fetch is not enough evidence for a city score", () => {
-  const weather = events.filter((event) => event.source === "weather");
+  const weather = events.filter((event) => event.source === "weather").map(event => ({...event, simulated: false}));
   const result = analyzeStatus(
     "live",
     [{ source: "weather", status: "live", events: weather, updatedAt: at }],

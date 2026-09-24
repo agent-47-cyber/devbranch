@@ -96,6 +96,11 @@ export function analyzeStatus(
         .filter(
           (event) =>
             available.has(event.source) &&
+            !(
+              mode === "live" &&
+              event.simulated &&
+              ["weather", "air_quality"].includes(event.source)
+            ) &&
             Date.parse(event.observedAt) <= Date.parse(at),
         )
         .map((event) => [event.id, event]),

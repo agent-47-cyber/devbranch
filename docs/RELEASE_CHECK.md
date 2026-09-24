@@ -1,7 +1,7 @@
 # Final release check — 25 September 2026
 
 - Lint, TypeScript and production build passed.
-- 19 unit tests passed, including every one of the 18 replay frames, source outages,
+- 20 unit tests passed, including every one of the 18 replay frames, source outages,
   time-window boundaries, association safety, threshold expiry and Groq fact validation.
 - Local integration verified the status/transport/reports routes, replay routes,
   invalid-request handling, Supabase event write/read, link storage and source status.
@@ -21,3 +21,8 @@
 This remains a civic-data prototype, not an official incident or emergency service.
 Transport and reports are intentionally simulated; advanced additions are threshold
 flags and multi-day replay, not trained ML or an autonomous monitoring agent.
+
+Production checks: Vercel retrieved both public feeds and generated a Groq-grounded
+brief successfully. All 18 production replay routes and invalid-query handling passed.
+Old synthetic weather/AQI history from earlier fallback code is excluded from live
+analysis and charts; stored records were not destructively removed.

@@ -1,7 +1,30 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getReplayStatus } from "../lib/status";
+import { analyzeStatus, getReplayStatus } from "../lib/status";
 import { getReplayEvents, getReplaySteps } from "../lib/replay";
+
+test("old synthetic weather cannot contaminate live analysis or charts", () => {
+  const at = getReplaySteps(2)[5].at;
+  const replay = getReplayEvents(5, 2);
+  const real = {
+    ...replay.find((event) => event.type === "rain")!,
+    id: "public-rain",
+    simulated: false,
+    observedAt: at,
+  };
+  const result = analyzeStatus(
+    "live",
+    [{ source: "weather", status: "live", updatedAt: at, events: [real] }],
+    replay,
+    at,
+  );
+  assert.deepEqual(
+    result.observationHistory.map((event) => event.id),
+    ["public-rain"],
+  );
+  assert.equal(result.analysis.baselineSources, 0);
+  assert.equal(result.possibleLinks.length, 0);
+});
 
 test("all 18 replay frames expose only ingested history through the chosen instant", async () => {
   for (let day = 0; day < 3; day++) {
