@@ -41,33 +41,30 @@ export function createCityStatus(
     .map((event) => ({ event, result: detectUnusual(event, events, at) }))
     .filter(({ result }) => result.unusual);
 
-  // Real urban baseline friction: account for atmospheric AQI, transit delay, and daily civic intake.
-  // A living city never has 100/100; healthy baseline operates realistically at ~86-90.
   const activeEvents = [...latest.values()];
-  const aqiEvent = activeEvents.find((e) => e.type === "aqi");
   const delayEvent = activeEvents.find((e) => e.type === "delay");
+  const aqiEvent = activeEvents.find((e) => e.type === "aqi");
+  const rainEvent = activeEvents.find((e) => e.type === "rain");
   const reportsCount = activeEvents
     .filter((e) => e.source === "local_report")
     .reduce((sum, e) => sum + e.value, 0);
 
-  const aqiFriction = aqiEvent
-    ? Math.max(2, Math.min(16, Math.round((aqiEvent.value - 35) * 0.08)))
-    : 4;
-  const transitFriction = delayEvent
-    ? Math.max(2, Math.min(15, Math.round(delayEvent.value * 0.7)))
-    : 3;
-  const civicFriction = Math.max(2, Math.min(10, Math.round(reportsCount * 0.35)));
+  // Component Scores (0-100) mapped from observed values
+  const mobilityScore = delayEvent ? Math.max(0, 100 - delayEvent.value * 3) : 100;
+  const aqiScore = aqiEvent ? Math.max(0, 100 - Math.round(aqiEvent.value / 3.5)) : 100;
+  const weatherScore = rainEvent ? Math.max(0, 100 - rainEvent.value * 5) : 100;
+  const incidentsScore = Math.max(0, 100 - Math.round(reportsCount * 6.67));
 
-  // Baseline urban drag naturally brings the nominal ceiling to ~87-91
-  const urbanFriction = Math.max(9, Math.min(26, aqiFriction + transitFriction + civicFriction));
-
-  const strongestLink = links[0];
-  const linkImpact = strongestLink ? strongestLink.linkScore * 38 : 0;
-  const signalImpact = Math.min(22, unusualEvents.length * 4);
-
+  // Weighted health across current civic signals
+  // Renormalized to 100% since Cleanliness (10%) is excluded from current feeds. (Sum = 90)
   const score = Math.round(
-    Math.max(15, Math.min(93, 100 - urbanFriction - linkImpact - signalImpact)),
+    mobilityScore * (30 / 90) +
+    aqiScore * (25 / 90) +
+    weatherScore * (20 / 90) +
+    incidentsScore * (15 / 90)
   );
+  
+  const strongestLink = links[0];
 
   return {
     score,
