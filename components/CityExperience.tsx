@@ -16,7 +16,7 @@ import replayDays from "@/data/replayDays.json";
 import { CivicAlerts } from "@/components/CivicAlerts";
 import { CivicTelemetryDashboard } from "@/components/CivicTelemetryDashboard";
 import { ActiveIncidents } from "@/components/ActiveIncidents";
-import { HeatTimeline } from "@/components/HeatTimeline";
+
 import { NarrativeTicker } from "@/components/NarrativeTicker";
 import { SensorOverlay } from "@/components/SensorOverlay";
 import { timeLabel } from "@/lib/display";
@@ -236,16 +236,7 @@ export function CityExperience() {
               at={data.updatedAt}
             />
             <WhatsHappening data={data} />
-            {mode === "replay" && frames.length > 0 && (
-              <HeatTimeline
-                frames={frames}
-                currentStep={step}
-                onStepChange={(next) => {
-                  setPlaying(false);
-                  setStep(next);
-                }}
-              />
-            )}
+
             <SensorOverlay />
             <DataSources
               sources={data.sources}
