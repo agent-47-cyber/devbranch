@@ -43,6 +43,18 @@ CityPulse/
 └── README.md               # Setup and navigation guide
 ```
 
+## Development Documentation
+
+Contributors and coding agents must read [AGENTS.md](AGENTS.md) before modifying the project.
+
+- [Project specification](docs/PROJECT_SPEC.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Data contracts](docs/DATA_CONTRACTS.md)
+- [Implementation phases](docs/IMPLEMENTATION_PHASES.md)
+- [UI rules](docs/UI_RULES.md)
+- [Constraints](docs/CONSTRAINTS.md)
+- [Test checklist](docs/TEST_CHECKLIST.md)
+
 ## Phase 1
 
 This phase contains only the Next.js foundation, dependency setup, directory scaffold, Supabase helpers, schema, and placeholder API routes. It intentionally does not include data normalization, detection logic, replay, or a dashboard.
