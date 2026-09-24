@@ -1,10 +1,13 @@
 "use client";
+import replayDays from "@/data/replayDays.json";
 
 interface ReplayControlsProps {
   step: number;
   totalSteps: number;
   isPlaying: boolean;
   labels: string[];
+  day: number;
+  onDayChange: (day: number) => void;
   onStepChange: (step: number) => void;
   onPlayToggle: () => void;
 }
@@ -14,13 +17,37 @@ export function ReplayControls({
   totalSteps,
   isPlaying,
   labels,
+  day,
+  onDayChange,
   onStepChange,
   onPlayToggle,
 }: ReplayControlsProps) {
   return (
+    <div className="replay-history section-shell">
+      <div className="replay-history-heading">
+        <div>
+          <p className="eyebrow">A city, over time</p>
+          <h2>Three days. Different stories.</h2>
+        </div>
+        <p>Simulated history · 22–24 September 2026</p>
+      </div>
+      <div className="replay-days" role="group" aria-label="Choose a replay day">
+        {replayDays.map((entry, index) => (
+          <button
+            key={entry.date}
+            aria-pressed={day === index}
+            onClick={() => onDayChange(index)}
+          >
+            <span>{entry.label}</span>
+            <strong>{entry.title}</strong>
+            <small>{day === index ? "Selected day" : "Explore this day"} ↗</small>
+          </button>
+        ))}
+      </div>
+      <p className="replay-day-description">{replayDays[day].description}</p>
     <section className="replay-controls" aria-label="Replay controls">
       <div>
-        <p className="eyebrow">Jaipur rain situation</p>
+        <p className="eyebrow">{replayDays[day].label} · {replayDays[day].title}</p>
         <p className="replay-time">{labels[step] ?? ""}</p>
       </div>
       <button className="play-button" type="button" onClick={onPlayToggle}>
@@ -43,9 +70,10 @@ export function ReplayControls({
         ))}
       </div>
       <p className="replay-explainer">
-        Recorded scenario · all observations are simulated. Scrub through the
-        same analysis, moment by moment.
+        All observations are simulated. Move through this day to see readings,
+        alerts and possible links change together.
       </p>
     </section>
+    </div>
   );
 }

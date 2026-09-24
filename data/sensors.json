@@ -1,0 +1,122 @@
+[
+  {
+    "id": "wl-malviya-01",
+    "type": "water_level",
+    "label": "Water Level Sensor",
+    "area": "Malviya Nagar",
+    "latitude": 26.8567,
+    "longitude": 75.8053,
+    "value": 0.4,
+    "unit": "m",
+    "normalRange": [0, 0.3],
+    "status": "active"
+  },
+  {
+    "id": "wl-cscheme-01",
+    "type": "water_level",
+    "label": "Water Level Sensor",
+    "area": "C-Scheme",
+    "latitude": 26.9118,
+    "longitude": 75.7971,
+    "value": 0.2,
+    "unit": "m",
+    "normalRange": [0, 0.3],
+    "status": "active"
+  },
+  {
+    "id": "tc-jagatpura-01",
+    "type": "traffic_camera",
+    "label": "Traffic Camera",
+    "area": "Jagatpura",
+    "latitude": 26.8213,
+    "longitude": 75.8545,
+    "value": 72,
+    "unit": "vehicles/5min",
+    "normalRange": [40, 90],
+    "status": "active"
+  },
+  {
+    "id": "tc-mansarovar-01",
+    "type": "traffic_camera",
+    "label": "Traffic Camera",
+    "area": "Mansarovar",
+    "latitude": 26.8654,
+    "longitude": 75.7601,
+    "value": 58,
+    "unit": "vehicles/5min",
+    "normalRange": [40, 90],
+    "status": "active"
+  },
+  {
+    "id": "aq-vaishali-01",
+    "type": "air_monitor",
+    "label": "Air Quality Monitor",
+    "area": "Vaishali Nagar",
+    "latitude": 26.9125,
+    "longitude": 75.7396,
+    "value": 88,
+    "unit": "US AQI",
+    "normalRange": [0, 100],
+    "status": "active"
+  },
+  {
+    "id": "aq-tonk-01",
+    "type": "air_monitor",
+    "label": "Air Quality Monitor",
+    "area": "Tonk Road",
+    "latitude": 26.8722,
+    "longitude": 75.7917,
+    "value": 124,
+    "unit": "US AQI",
+    "normalRange": [0, 100],
+    "status": "active"
+  },
+  {
+    "id": "wl-jagatpura-01",
+    "type": "water_level",
+    "label": "Water Level Sensor",
+    "area": "Jagatpura",
+    "latitude": 26.8195,
+    "longitude": 75.8498,
+    "value": 0.1,
+    "unit": "m",
+    "normalRange": [0, 0.3],
+    "status": "active"
+  },
+  {
+    "id": "tc-malviya-01",
+    "type": "traffic_camera",
+    "label": "Traffic Camera",
+    "area": "Malviya Nagar",
+    "latitude": 26.8493,
+    "longitude": 75.8082,
+    "value": 95,
+    "unit": "vehicles/5min",
+    "normalRange": [40, 90],
+    "status": "active"
+  },
+  {
+    "id": "aq-malviya-01",
+    "type": "air_monitor",
+    "label": "Air Quality Monitor",
+    "area": "Malviya Nagar",
+    "latitude": 26.8551,
+    "longitude": 75.8135,
+    "value": 105,
+    "unit": "US AQI",
+    "normalRange": [0, 100],
+    "status": "active"
+  },
+  {
+    "id": "wl-vaishali-01",
+    "type": "water_level",
+    "label": "Water Level Sensor",
+    "area": "Vaishali Nagar",
+    "latitude": 26.9108,
+    "longitude": 75.7345,
+    "value": 0.15,
+    "unit": "m",
+    "normalRange": [0, 0.3],
+    "status": "active"
+  }
+]

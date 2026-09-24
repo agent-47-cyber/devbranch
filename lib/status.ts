@@ -2,7 +2,8 @@ import { fetchAirQualityEvents } from "@/lib/airQuality";
 import { getJaipurArea } from "@/lib/areas";
 import { createCityStatus } from "@/lib/cityStatus";
 import { findPossibleLinks } from "@/lib/findLinks";
-import { getReplayEvents, replaySteps } from "@/lib/replay";
+import { defaultReplayDay, getReplayEvents, getReplaySteps, replaySteps } from "@/lib/replay";
+import { createAlerts } from "@/lib/alerts";
 import {
   getLocalReportRecords,
   normalizeLocalReportRecords,
@@ -212,6 +213,7 @@ export function analyzeStatus(
       : "Missing evidence is not an all-clear. Use the timestamped public readings as context; simulated reports do not describe current road conditions.",
     current,
     possibleLinks,
+    alerts: createAlerts(events, at, possibleLinks),
     recentUpdates: updates
       .sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
       .slice(-8),
@@ -235,7 +237,13 @@ async function collect(
 ): Promise<SourceResponse> {
   let response: SourceResponse;
   try {
-    response = createSourceResponse(source, state, await fn());
+    const events = await fn();
+    const isSimulated = events.some((event) => event.simulated);
+    response = createSourceResponse(
+      source,
+      isSimulated && state === "live" ? "simulated" : state,
+      events,
+    );
   } catch {
     response = createSourceResponse(
       source,
@@ -299,9 +307,10 @@ export async function getLiveStatus(): Promise<CityStatusResponse> {
 
 export async function getReplayStatus(
   stepIndex: number,
+  dayIndex = defaultReplayDay,
 ): Promise<CityStatusResponse> {
   const step = Math.max(0, Math.min(stepIndex, replaySteps.length - 1));
-  const events = getReplayEvents(step);
+  const events = getReplayEvents(step, dayIndex);
   const responses = sources.map((source) =>
     createSourceResponse(
       source,
@@ -313,7 +322,7 @@ export async function getReplayStatus(
     "replay",
     responses,
     [],
-    new Date(replaySteps[step].at).toISOString(),
+    getReplaySteps(dayIndex)[step].at,
   );
 }
 

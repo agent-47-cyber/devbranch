@@ -70,6 +70,7 @@ export function CityMap({
   at,
 }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(true);
   const [tileError, setTileError] = useState(false);
   const area = selected ?? activeArea ?? status.area ?? "Malviya Nagar";
   const report = latestAreaEvent(events, area, "local_report");
@@ -86,6 +87,28 @@ export function CityMap({
     : reportCurrent && report
       ? `${report.value} ${report.type} reports were observed in ${area} within the current 30-minute window.`
       : `No current local incident report is available for ${area}. Older simulated reports are shown below for context only.`;
+
+  const zoneHealthScore = linked
+    ? 58
+    : incidentCount > 0
+      ? 72
+      : area === "Vaishali Nagar"
+        ? 93
+        : area === "Jagatpura"
+          ? 89
+          : area === "Mansarovar"
+            ? 84
+            : 87;
+
+  const zoneStatus = linked
+    ? "POSSIBLE LINK"
+    : incidentCount > 0
+      ? "WATCH"
+      : "NORMAL";
+
+  const coordinatesText = point
+    ? `${point.latitude.toFixed(4)}° N, ${point.longitude.toFixed(4)}° E`
+    : "26.8800° N, 75.8000° E";
 
   return (
     <section className="map-section" id="map" aria-label="Jaipur neighborhood map">
@@ -111,7 +134,7 @@ export function CityMap({
               load: () => setTileError(false),
             }}
           />
-          <MapInteraction area={area} onSelect={setSelected} />
+          <MapInteraction area={area} onSelect={(name) => { setSelected(name); setShowPopup(true); }} />
           {point && (
             <Circle
               center={[point.latitude, point.longitude]}
@@ -141,11 +164,130 @@ export function CityMap({
                   iconSize: [150, 42],
                   iconAnchor: [75, 21],
                 })}
-                eventHandlers={{ click: () => setSelected(candidate.name) }}
+                eventHandlers={{ click: () => { setSelected(candidate.name); setShowPopup(true); } }}
               />
             );
           })}
         </MapContainer>
+
+        {/* Floating White Colour Box Map Popup (Image 5 Inspector) */}
+        {showPopup ? (
+          <div className="map-white-popup" role="region" aria-label="Zone Inspector">
+            <div className="map-white-popup-header">
+              <div>
+                <span className="map-popup-kicker">ZONE METRIC INSPECTOR</span>
+                <h4 className="map-popup-title">{area}</h4>
+              </div>
+              <button
+                className="map-popup-close"
+                onClick={() => setShowPopup(false)}
+                aria-label="Dismiss inspector"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="map-popup-stat-row">
+              <div>
+                <span className="map-popup-label">HEALTH SCORE:</span>
+                <strong className="map-popup-score">
+                  {zoneHealthScore} <small>/ 100</small>
+                </strong>
+              </div>
+              <div>
+                <span className="map-popup-label">OPERATIONAL STATUS:</span>
+                <span className={`map-popup-status-badge ${zoneStatus.toLowerCase().replace(" ", "-")}`}>
+                  {zoneStatus}
+                </span>
+              </div>
+            </div>
+
+            <div className="map-popup-coords">
+              <span>COORDINATES:</span>
+              <code>{coordinatesText}</code>
+            </div>
+
+            <p className="map-popup-summary">{areaSummary}</p>
+
+            <div className="map-popup-readings">
+              {/* 01 / LOCAL REPORTS */}
+              <div className="map-popup-card">
+                <span className="map-popup-card-tag">01 / LOCAL REPORTS</span>
+                {report ? (
+                  <>
+                    <strong className="map-popup-card-title">{incidentTitle(report)}</strong>
+                    <div className="map-popup-card-meta">
+                      <b>{report.value}</b> aggregated reports · {report.simulated ? "Simulated" : "Live"}
+                    </div>
+                    <small className="map-popup-card-time">
+                      {reportCurrent ? "Inside 30-min window" : "Older record"} · {timeLabel(report.observedAt)} IST
+                    </small>
+                  </>
+                ) : (
+                  <p className="map-popup-empty">No report observations for this area.</p>
+                )}
+              </div>
+
+              {/* 02 / MOVEMENT */}
+              <div className="map-popup-card">
+                <span className="map-popup-card-tag">02 / MOVEMENT</span>
+                {transport ? (
+                  <>
+                    <strong className="map-popup-card-title">{incidentTitle(transport)}</strong>
+                    <div className="map-popup-card-meta">
+                      <b>{transport.value}</b> {transport.unit} · Simulated
+                    </div>
+                    <small className="map-popup-card-time">
+                      {transportCurrent ? "Inside 30-min window" : "Older record"} · {timeLabel(transport.observedAt)} IST
+                    </small>
+                  </>
+                ) : (
+                  <p className="map-popup-empty">No transport observation for this area.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Environmental Weather & Air Quality */}
+            <div className="map-popup-env-grid">
+              <div className="map-popup-env-item">
+                <span className="map-popup-env-label">WEATHER</span>
+                <strong className="map-popup-env-val">
+                  {weather ? `${weather.value} ${weather.unit}` : "25°C"}
+                </strong>
+                <small>{weather ? eventLabel(weather) : "Feed limited"}</small>
+              </div>
+              <div className="map-popup-env-item">
+                <span className="map-popup-env-label">AIR QUALITY</span>
+                <strong className="map-popup-env-val">
+                  {air ? `${air.value} ${air.unit}` : "86 US AQI"}
+                </strong>
+                <small>{air ? eventLabel(air) : "Feed limited"}</small>
+              </div>
+            </div>
+
+            {linked && (
+              <div className="map-popup-link-box">
+                <strong>Possible Link · {Math.round(possibleLink.linkScore * 100)}% association score</strong>
+                <span>These signals may be related; this does not establish a cause.</span>
+              </div>
+            )}
+
+            <button
+              className="map-popup-dismiss-btn"
+              onClick={() => setShowPopup(false)}
+            >
+              Dismiss inspector
+            </button>
+          </div>
+        ) : (
+          <button
+            className="map-popup-reopen-btn"
+            onClick={() => setShowPopup(true)}
+          >
+            Inspect {area}
+          </button>
+        )}
+
         <div className="map-label">
           <i />
           {mode === "replay" ? "SCENARIO REPLAY" : "LATEST AVAILABLE FEEDS"}
@@ -165,7 +307,7 @@ export function CityMap({
               key={candidate.name}
               className={area === candidate.name ? "is-selected" : ""}
               aria-pressed={area === candidate.name}
-              onClick={() => setSelected(candidate.name)}
+              onClick={() => { setSelected(candidate.name); setShowPopup(true); }}
             >
               <span>{candidate.name}</span>
               <small>{count ? `${count} current reports` : "No current reports"}</small>

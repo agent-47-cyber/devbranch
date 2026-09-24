@@ -28,7 +28,7 @@ export function CityArrival({
         {error ??
           (mode === "live"
             ? "Retrieving public weather and air quality. Bringing the latest readings and labelled civic simulations into view."
-            : "Loading six moments from a simulated rain scenario. The same analysis, at a different time.")}
+            : "Loading three simulated days, from quieter conditions to growing disruption. Explore six moments in each day.")}
       </p>
       <div className="arrival-feeds">
         {(["weather", "air_quality", "transport", "local_report"] as const).map(

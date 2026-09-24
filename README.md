@@ -14,6 +14,8 @@ CityPulse is a civic signal dashboard for Jaipur built for AmiHacks Problem Stat
 - Shows possible links without claiming that one event caused another.
 - Presents the result through an animated dashboard and interactive map.
 - Includes a deterministic replay of the Malviya Nagar demonstration scenario.
+- Offers three simulated days (22–24 September 2026), each with six moments and different rain, report, and delay levels.
+- Highlights current readings that cross transparent project alert thresholds; expired or superseded readings stop triggering alerts.
 - Keeps working when an individual source is unavailable.
 - Optionally uses Groq to arrange source-grounded facts into a concise brief; deterministic template summaries remain the fallback.
 
@@ -147,6 +149,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `GET /api/reports` | Loads normalized simulated local-report observations |
 | `GET /api/status?mode=live` | Returns the complete live dashboard contract |
 | `GET /api/status?mode=replay&step=0` | Returns a replay frame; steps run from stable to linked conditions |
+| `GET /api/status?mode=replay&day=0&step=5` | Selects a simulated day: `0` = 22 Sept, `1` = 23 Sept, `2` = 24 Sept (default) |
 
 The frontend consumes the normalized `/api/status` contract instead of analysing raw provider responses.
 
@@ -163,6 +166,21 @@ Replay demonstrates the full correlation path using the same analysis functions 
 ```
 
 Use the **Live / Replay** switch, play/pause control, or timeline to inspect each stage.
+
+Choose a date to compare a quieter day, gradually building rain, and a larger disruption. These days are synthetic profiles built from the fixtures, not historical measurements. Every day passes through the same normalizers, rolling-window analysis, summaries, alerts, and map. Replay never writes simulated history into live storage.
+
+### In-dashboard alerts
+
+The latest observation for each area and signal is checked against these prototype thresholds:
+
+| Signal | Threshold |
+| --- | --- |
+| Rainfall | 10 mm |
+| US AQI | 150 US AQI |
+| Transport delay | 15 minutes |
+| Waterlogging reports | 10 aggregated reports |
+
+Only observations inside the current 30-minute window can trigger an alert. A newer reading below its threshold clears the flag. Cards preserve the observation time, public/simulated label, and any connection to an existing Possible Link. These are project rules, not official emergency thresholds; they do not send external notifications.
 
 ## Quality checks
 

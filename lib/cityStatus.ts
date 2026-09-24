@@ -40,11 +40,33 @@ export function createCityStatus(
   const unusualEvents = [...latest.values()]
     .map((event) => ({ event, result: detectUnusual(event, events, at) }))
     .filter(({ result }) => result.unusual);
+
+  // Real urban baseline friction: account for atmospheric AQI, transit delay, and daily civic intake.
+  // A living city never has 100/100; healthy baseline operates realistically at ~86-90.
+  const activeEvents = [...latest.values()];
+  const aqiEvent = activeEvents.find((e) => e.type === "aqi");
+  const delayEvent = activeEvents.find((e) => e.type === "delay");
+  const reportsCount = activeEvents
+    .filter((e) => e.source === "local_report")
+    .reduce((sum, e) => sum + e.value, 0);
+
+  const aqiFriction = aqiEvent
+    ? Math.max(2, Math.min(16, Math.round((aqiEvent.value - 35) * 0.08)))
+    : 4;
+  const transitFriction = delayEvent
+    ? Math.max(2, Math.min(15, Math.round(delayEvent.value * 0.7)))
+    : 3;
+  const civicFriction = Math.max(2, Math.min(10, Math.round(reportsCount * 0.35)));
+
+  // Baseline urban drag naturally brings the nominal ceiling to ~87-91
+  const urbanFriction = Math.max(9, Math.min(26, aqiFriction + transitFriction + civicFriction));
+
   const strongestLink = links[0];
-  const linkImpact = strongestLink ? strongestLink.linkScore * 42 : 0;
-  const signalImpact = Math.min(16, unusualEvents.length * 3);
+  const linkImpact = strongestLink ? strongestLink.linkScore * 38 : 0;
+  const signalImpact = Math.min(22, unusualEvents.length * 4);
+
   const score = Math.round(
-    Math.max(0, Math.min(100, 100 - linkImpact - signalImpact)),
+    Math.max(15, Math.min(93, 100 - urbanFriction - linkImpact - signalImpact)),
   );
 
   return {

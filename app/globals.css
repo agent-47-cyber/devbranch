@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "./observatory.css";
+@import "./replay-alerts.css";
+@import "./innovations.css";
+@import "./telemetry.css";
 
 :root {
   --paper: #f6f4ee;

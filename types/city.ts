@@ -80,6 +80,21 @@ export interface RecentUpdate {
   area: string;
 }
 
+export interface CivicAlert {
+  id: string;
+  eventId: string;
+  area: string;
+  source: CitySource;
+  title: string;
+  summary: string;
+  value: number;
+  unit: string;
+  threshold: number;
+  observedAt: string;
+  simulated: boolean;
+  linked: boolean;
+}
+
 export interface CityStatusResponse {
   mode: "live" | "replay";
   city: "Jaipur";
@@ -95,6 +110,7 @@ export interface CityStatusResponse {
   };
   current: CurrentSituation;
   possibleLinks: PossibleLink[];
+  alerts: CivicAlert[];
   recentUpdates: RecentUpdate[];
   mapEvents: CityEvent[];
   sources: SourceStatusRecord[];

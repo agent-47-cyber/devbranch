@@ -1,0 +1,32 @@
+[
+  {
+    "date": "2026-09-22",
+    "label": "22 Sept",
+    "title": "A quieter day",
+    "description": "Light everyday delays and scattered reports, with no rain in the scenario.",
+    "offsetDays": -2,
+    "rainScale": 0,
+    "reportCap": 3,
+    "delayCap": 5
+  },
+  {
+    "date": "2026-09-23",
+    "label": "23 Sept",
+    "title": "Rain builds",
+    "description": "Rain and reports rise gradually while transport delays stay below the project alert threshold.",
+    "offsetDays": -1,
+    "rainScale": 0.4,
+    "reportCap": 6,
+    "delayCap": 9
+  },
+  {
+    "date": "2026-09-24",
+    "label": "24 Sept",
+    "title": "Disruption unfolds",
+    "description": "Rain, waterlogging reports and delays increase together in Malviya Nagar.",
+    "offsetDays": 0,
+    "rainScale": 1,
+    "reportCap": 12,
+    "delayCap": 18
+  }
+]

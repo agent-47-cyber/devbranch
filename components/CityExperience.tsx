@@ -12,6 +12,13 @@ import { Header } from "@/components/Header";
 import { ReplayControls } from "@/components/ReplayControls";
 import { WhatsHappening } from "@/components/WhatsHappening";
 import replay from "@/data/replay.json";
+import replayDays from "@/data/replayDays.json";
+import { CivicAlerts } from "@/components/CivicAlerts";
+import { CivicTelemetryDashboard } from "@/components/CivicTelemetryDashboard";
+import { ActiveIncidents } from "@/components/ActiveIncidents";
+import { HeatTimeline } from "@/components/HeatTimeline";
+import { NarrativeTicker } from "@/components/NarrativeTicker";
+import { SensorOverlay } from "@/components/SensorOverlay";
 import { timeLabel } from "@/lib/display";
 import type { CityStatusResponse } from "@/types/city";
 
@@ -22,7 +29,9 @@ export function CityExperience() {
   const [step, setStep] = useState(0);
   const root = useRef<HTMLElement>(null);
   const [playing, setPlaying] = useState(false);
-  const [frames, setFrames] = useState<CityStatusResponse[]>([]);
+  const [replayDay, setReplayDay] = useState(replayDays.length - 1);
+  const [framesByDay, setFramesByDay] = useState<Record<number, CityStatusResponse[]>>({});
+  const frames = framesByDay[replayDay] ?? [];
   const [live, setLive] = useState<CityStatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
@@ -116,11 +125,17 @@ export function CityExperience() {
       try {
         if (mode === "replay") {
           const next = await Promise.all(
-            labels.map((_, index) =>
-              read(`/api/status?mode=replay&step=${index}`),
-            ),
+            replayDays.map(async (_, day) => {
+              const dayFrames = await Promise.all(
+                labels.map((_, index) =>
+                  read(`/api/status?mode=replay&step=${index}&day=${day}`),
+                ),
+              );
+              return [day, dayFrames] as const;
+            }),
           );
-          if (!controller.signal.aborted) setFrames(next);
+          if (!controller.signal.aborted)
+            setFramesByDay(Object.fromEntries(next));
         } else {
           const next = await read("/api/status?mode=live");
           if (!controller.signal.aborted) setLive(next);
@@ -146,9 +161,9 @@ export function CityExperience() {
       controller.abort();
       if (timer) window.clearInterval(timer);
     };
-    // A mode/retry change owns one request lifecycle; scrolling and the slider never fetch.
+    // A mode/day/retry change owns one request lifecycle; the slider uses cached frames.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, retry]);
+  }, [mode, retry, replayDay]);
 
   useEffect(() => {
     if (!playing || mode !== "replay") return;
@@ -192,12 +207,19 @@ export function CityExperience() {
         ) : (
           <>
             <CityStatus data={data} />
+            <NarrativeTicker data={data} />
             {mode === "replay" && (
               <ReplayControls
                 step={step}
                 totalSteps={labels.length}
                 isPlaying={playing}
                 labels={labels}
+                day={replayDay}
+                onDayChange={(next) => {
+                  setPlaying(false);
+                  setStep(0);
+                  setReplayDay(next);
+                }}
                 onStepChange={(next) => {
                   setPlaying(false);
                   setStep(next);
@@ -205,12 +227,26 @@ export function CityExperience() {
                 onPlayToggle={togglePlay}
               />
             )}
+            <CivicAlerts alerts={data.alerts} mode={mode} />
+            <CivicTelemetryDashboard data={data} />
+            <ActiveIncidents data={data} />
             <CurrentSituation
               current={data.current}
               mode={mode}
               at={data.updatedAt}
             />
             <WhatsHappening data={data} />
+            {mode === "replay" && frames.length > 0 && (
+              <HeatTimeline
+                frames={frames}
+                currentStep={step}
+                onStepChange={(next) => {
+                  setPlaying(false);
+                  setStep(next);
+                }}
+              />
+            )}
+            <SensorOverlay />
             <DataSources
               sources={data.sources}
               mode={mode}
