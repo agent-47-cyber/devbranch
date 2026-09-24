@@ -3,7 +3,7 @@
   { "id": "transport-002", "area": "Malviya Nagar", "route": "27", "delay": 4, "observedAt": "2026-09-24T16:25:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
   { "id": "transport-003", "area": "Malviya Nagar", "route": "27", "delay": 5, "observedAt": "2026-09-24T16:35:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
   { "id": "transport-004", "area": "Malviya Nagar", "route": "27", "delay": 4, "observedAt": "2026-09-24T16:45:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
-  { "id": "transport-005", "area": "Malviya Nagar", "route": "27", "delay": 6, "observedAt": "2026-09-24T16:55:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
+  { "id": "transport-005", "area": "Malviya Nagar", "route": "27", "delay": 5, "observedAt": "2026-09-24T16:55:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
   { "id": "transport-006", "area": "Malviya Nagar", "route": "27", "delay": 18, "observedAt": "2026-09-24T17:24:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
   { "id": "transport-007", "area": "Jagatpura", "route": "14", "delay": 4, "observedAt": "2026-09-24T16:15:00+05:30", "latitude": 26.8416, "longitude": 75.8601 },
   { "id": "transport-008", "area": "Jagatpura", "route": "14", "delay": 5, "observedAt": "2026-09-24T16:35:00+05:30", "latitude": 26.8416, "longitude": 75.8601 },

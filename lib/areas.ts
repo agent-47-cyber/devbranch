@@ -21,3 +21,18 @@ export function getJaipurArea(name: string): JaipurArea {
 
   return area;
 }
+
+export function findNearestJaipurArea(
+  latitude: number,
+  longitude: number,
+): JaipurArea {
+  return JAIPUR_AREAS.reduce((nearest, candidate) => {
+    const nearestDistance =
+      (nearest.latitude - latitude) ** 2 + (nearest.longitude - longitude) ** 2;
+    const candidateDistance =
+      (candidate.latitude - latitude) ** 2 +
+      (candidate.longitude - longitude) ** 2;
+
+    return candidateDistance < nearestDistance ? candidate : nearest;
+  });
+}

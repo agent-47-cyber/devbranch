@@ -5,3 +5,12 @@ out/
 .env.*
 !.env.local.example
 *.tsbuildinfo
+.stitch_import/
+supabase/.temp/
+.audit/
+
+.vercel
+.env*
+
+# Local design-source archive; not required by the application.
+/stitch_citypulse_ai_command_center.zip

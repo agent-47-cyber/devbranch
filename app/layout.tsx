@@ -3,10 +3,13 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "CityPulse",
-  description: "Live civic health dashboard for Jaipur",
+  description:
+    "Weather, air quality and simulated local signals, clearly explained for Jaipur.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body>{children}</body>

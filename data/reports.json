@@ -2,7 +2,7 @@
   { "id": "report-001", "type": "waterlogging", "area": "Malviya Nagar", "count": 2, "observedAt": "2026-09-24T16:15:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
   { "id": "report-002", "type": "waterlogging", "area": "Malviya Nagar", "count": 3, "observedAt": "2026-09-24T16:25:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
   { "id": "report-003", "type": "waterlogging", "area": "Malviya Nagar", "count": 2, "observedAt": "2026-09-24T16:35:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
-  { "id": "report-004", "type": "waterlogging", "area": "Malviya Nagar", "count": 4, "observedAt": "2026-09-24T16:45:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
+  { "id": "report-004", "type": "waterlogging", "area": "Malviya Nagar", "count": 3, "observedAt": "2026-09-24T16:45:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
   { "id": "report-005", "type": "waterlogging", "area": "Malviya Nagar", "count": 3, "observedAt": "2026-09-24T16:55:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
   { "id": "report-006", "type": "waterlogging", "area": "Malviya Nagar", "count": 12, "observedAt": "2026-09-24T17:16:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
   { "id": "report-007", "type": "road blockage", "area": "Jagatpura", "count": 2, "observedAt": "2026-09-24T16:30:00+05:30", "latitude": 26.8416, "longitude": 75.8601 },

@@ -1,8 +1,5 @@
 export type CitySource =
-  | "weather"
-  | "air_quality"
-  | "transport"
-  | "local_report";
+  "weather" | "air_quality" | "transport" | "local_report";
 
 export interface CityEvent {
   id: string;
@@ -41,3 +38,70 @@ export interface UnusualResult {
 }
 
 export type SourceState = "live" | "simulated" | "unavailable";
+
+export interface SourceResponse {
+  source: CitySource;
+  status: SourceState;
+  updatedAt: string | null;
+  events: CityEvent[];
+  message?: string;
+}
+
+export interface SourceStatusRecord {
+  source: CitySource;
+  status: SourceState;
+  lastSuccess: string | null;
+  lastAttempt: string;
+  error: string | null;
+  updatedAt: string;
+}
+
+export type CityStatusLabel = "Stable" | "Watch" | "Elevated" | "High";
+
+export interface CityStatus {
+  score: number;
+  label: CityStatusLabel;
+  area: string | null;
+}
+
+export interface CurrentSituation {
+  weather: CityEvent | null;
+  airQuality: CityEvent | null;
+  transport: CityEvent | null;
+  reports: CityEvent | null;
+}
+
+export interface RecentUpdate {
+  id: string;
+  at: string;
+  title: string;
+  detail: string;
+  source: CitySource | "possible_link";
+  area: string;
+}
+
+export interface CityStatusResponse {
+  mode: "live" | "replay";
+  city: "Jaipur";
+  updatedAt: string;
+  status: CityStatus;
+  summary: string;
+  whyItMatters: string;
+  summaryMeta?: {
+    provider: "groq" | "template";
+    model?: string;
+    generatedAt?: string;
+    note: string;
+  };
+  current: CurrentSituation;
+  possibleLinks: PossibleLink[];
+  recentUpdates: RecentUpdate[];
+  mapEvents: CityEvent[];
+  sources: SourceStatusRecord[];
+  analysis: {
+    activeSources: number;
+    baselineSources: number;
+    scoreAvailable: boolean;
+    explanation: string;
+  };
+}

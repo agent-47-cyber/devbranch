@@ -15,7 +15,7 @@ create table if not exists events (
 );
 
 create table if not exists possible_links (
-  id uuid primary key default gen_random_uuid(),
+  id text primary key,
   area text not null,
   start_time timestamptz not null,
   end_time timestamptz not null,
@@ -37,3 +37,9 @@ create table if not exists source_status (
   error text,
   updated_at timestamptz default now()
 );
+
+-- Browser clients have no direct access. Next.js uses the server-only service key.
+alter table public.events enable row level security;
+alter table public.possible_links enable row level security;
+alter table public.source_status enable row level security;
+create index if not exists events_observed_at_idx on public.events (observed_at desc);

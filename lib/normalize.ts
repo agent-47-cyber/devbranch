@@ -15,17 +15,25 @@ export interface CityEventInput {
 }
 
 function assertIsoTimestamp(value: string, field: string): string {
-  if (Number.isNaN(Date.parse(value))) {
+  if (!/^\d{4}-\d{2}-\d{2}T/.test(value) || Number.isNaN(Date.parse(value))) {
     throw new Error(`${field} must be a valid ISO 8601 timestamp.`);
   }
 
-  return value;
+  const zoned = /(?:Z|[+-]\d{2}:\d{2})$/i.test(value) ? value : `${value}Z`;
+  return new Date(zoned).toISOString();
 }
 
 export function createCityEvent(
   input: CityEventInput,
   receivedAt = new Date().toISOString(),
 ): CityEvent {
+  if (
+    ![input.value, input.latitude, input.longitude].every(Number.isFinite) ||
+    Math.abs(input.latitude) > 90 ||
+    Math.abs(input.longitude) > 180
+  ) {
+    throw new Error("CityEvent needs a finite value and valid coordinates.");
+  }
   return {
     ...input,
     observedAt: assertIsoTimestamp(input.observedAt, "observedAt"),
