@@ -92,6 +92,7 @@ export function WhatsHappening({ data }: { data: CityStatusResponse }) {
             activeSource={activeSource}
             activeArea={activeEvent?.area}
             mode={data.mode}
+            at={data.updatedAt}
           />
           <div className="story-map-caption">
             <span>

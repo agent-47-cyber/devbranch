@@ -9,9 +9,28 @@ import { inWindow, timeScore } from "../lib/timeCheck";
 import { locationScore } from "../lib/locationCheck";
 import { normalizeWeatherResponse } from "../lib/weather";
 import { normalizeAirQualityResponse } from "../lib/airQuality";
+import {
+  currentIncidentCount,
+  isCurrentMapEvent,
+  latestAreaEvent,
+} from "../lib/mapView";
 
 const at = new Date(replaySteps.at(-1)!.at).toISOString();
 const events = getReplayEvents(replaySteps.length - 1);
+
+test("map incidents use the selected area's latest report and observation time", () => {
+  const malviya = latestAreaEvent(events, "Malviya Nagar", "local_report");
+  const jagatpura = latestAreaEvent(events, "Jagatpura", "local_report");
+  assert.equal(malviya?.value, 12);
+  assert.equal(jagatpura?.value, 3);
+  assert.equal(currentIncidentCount(events, "Malviya Nagar", at), 12);
+  assert.equal(currentIncidentCount(events, "Jagatpura", at), 3);
+  assert.equal(isCurrentMapEvent(malviya!, at), true);
+  assert.equal(
+    currentIncidentCount(events, "Malviya Nagar", "2026-09-25T12:00:00.000Z"),
+    0,
+  );
+});
 
 test("all four normalizers produce finite, zoned, synthetic replay events", () => {
   assert.equal(new Set(events.map((e) => e.source)).size, 4);
