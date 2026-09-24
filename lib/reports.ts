@@ -1,2 +1,47 @@
-// Simulated civic-report data integration will be implemented in Phase 2.
-export {};
+import reportData from "@/data/reports.json";
+import { createCityEvent } from "@/lib/normalize";
+import type { CityEvent } from "@/types/city";
+
+export type LocalReportType =
+  | "waterlogging"
+  | "road blockage"
+  | "traffic signal problem"
+  | "power outage"
+  | "fallen tree";
+
+export interface LocalReportRecord {
+  id: string;
+  type: LocalReportType;
+  area: string;
+  count: number;
+  observedAt: string;
+  latitude: number;
+  longitude: number;
+}
+
+export function getLocalReportRecords(): LocalReportRecord[] {
+  return reportData as LocalReportRecord[];
+}
+
+export function normalizeLocalReportRecords(
+  records: LocalReportRecord[],
+  receivedAt?: string,
+): CityEvent[] {
+  return records.map((record) =>
+    createCityEvent(
+      {
+        id: record.id,
+        source: "local_report",
+        type: record.type,
+        area: record.area,
+        latitude: record.latitude,
+        longitude: record.longitude,
+        observedAt: record.observedAt,
+        value: record.count,
+        unit: "reports",
+        simulated: true,
+      },
+      receivedAt,
+    ),
+  );
+}

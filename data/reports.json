@@ -1,1 +1,16 @@
-[]
+[
+  { "id": "report-001", "type": "waterlogging", "area": "Malviya Nagar", "count": 2, "observedAt": "2026-09-24T16:15:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
+  { "id": "report-002", "type": "waterlogging", "area": "Malviya Nagar", "count": 3, "observedAt": "2026-09-24T16:25:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
+  { "id": "report-003", "type": "waterlogging", "area": "Malviya Nagar", "count": 2, "observedAt": "2026-09-24T16:35:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
+  { "id": "report-004", "type": "waterlogging", "area": "Malviya Nagar", "count": 4, "observedAt": "2026-09-24T16:45:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
+  { "id": "report-005", "type": "waterlogging", "area": "Malviya Nagar", "count": 3, "observedAt": "2026-09-24T16:55:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
+  { "id": "report-006", "type": "waterlogging", "area": "Malviya Nagar", "count": 12, "observedAt": "2026-09-24T17:16:00+05:30", "latitude": 26.8477, "longitude": 75.8113 },
+  { "id": "report-007", "type": "road blockage", "area": "Jagatpura", "count": 2, "observedAt": "2026-09-24T16:30:00+05:30", "latitude": 26.8416, "longitude": 75.8601 },
+  { "id": "report-008", "type": "road blockage", "area": "Jagatpura", "count": 3, "observedAt": "2026-09-24T16:55:00+05:30", "latitude": 26.8416, "longitude": 75.8601 },
+  { "id": "report-009", "type": "traffic signal problem", "area": "Mansarovar", "count": 2, "observedAt": "2026-09-24T16:25:00+05:30", "latitude": 26.8507, "longitude": 75.7624 },
+  { "id": "report-010", "type": "traffic signal problem", "area": "Mansarovar", "count": 3, "observedAt": "2026-09-24T16:55:00+05:30", "latitude": 26.8507, "longitude": 75.7624 },
+  { "id": "report-011", "type": "power outage", "area": "C-Scheme", "count": 2, "observedAt": "2026-09-24T16:30:00+05:30", "latitude": 26.9118, "longitude": 75.7971 },
+  { "id": "report-012", "type": "power outage", "area": "C-Scheme", "count": 3, "observedAt": "2026-09-24T17:00:00+05:30", "latitude": 26.9118, "longitude": 75.7971 },
+  { "id": "report-013", "type": "fallen tree", "area": "Vaishali Nagar", "count": 2, "observedAt": "2026-09-24T16:30:00+05:30", "latitude": 26.9134, "longitude": 75.7445 },
+  { "id": "report-014", "type": "fallen tree", "area": "Vaishali Nagar", "count": 3, "observedAt": "2026-09-24T17:00:00+05:30", "latitude": 26.9134, "longitude": 75.7445 }
+]

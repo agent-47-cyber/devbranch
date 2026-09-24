@@ -1,1 +1,41 @@
-[]
+{
+  "city": "Jaipur",
+  "scenario": "Malviya Nagar rainfall and disruption",
+  "steps": [
+    {
+      "at": "2026-09-24T16:45:00+05:30",
+      "weather": { "temperature": 29, "rain": 0, "precipitation": 0, "windSpeed": 8, "weatherCode": 1 },
+      "airQuality": { "aqi": 78, "pm2_5": 28, "pm10": 52 },
+      "transportEventIds": ["transport-004"],
+      "reportEventIds": ["report-004"]
+    },
+    {
+      "at": "2026-09-24T17:05:00+05:30",
+      "weather": { "temperature": 28, "rain": 7, "precipitation": 7, "windSpeed": 17, "weatherCode": 63 },
+      "airQuality": { "aqi": 76, "pm2_5": 27, "pm10": 50 },
+      "transportEventIds": [],
+      "reportEventIds": []
+    },
+    {
+      "at": "2026-09-24T17:16:00+05:30",
+      "weather": { "temperature": 27, "rain": 14, "precipitation": 14, "windSpeed": 23, "weatherCode": 65 },
+      "airQuality": { "aqi": 74, "pm2_5": 25, "pm10": 47 },
+      "transportEventIds": [],
+      "reportEventIds": ["report-006"]
+    },
+    {
+      "at": "2026-09-24T17:24:00+05:30",
+      "weather": { "temperature": 26, "rain": 18, "precipitation": 18, "windSpeed": 26, "weatherCode": 65 },
+      "airQuality": { "aqi": 73, "pm2_5": 24, "pm10": 45 },
+      "transportEventIds": ["transport-006"],
+      "reportEventIds": ["report-006"]
+    },
+    {
+      "at": "2026-09-24T17:25:00+05:30",
+      "weather": { "temperature": 26, "rain": 18, "precipitation": 18, "windSpeed": 26, "weatherCode": 65 },
+      "airQuality": { "aqi": 73, "pm2_5": 24, "pm10": 45 },
+      "transportEventIds": ["transport-006"],
+      "reportEventIds": ["report-006"]
+    }
+  ]
+}
