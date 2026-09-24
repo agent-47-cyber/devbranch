@@ -14,7 +14,7 @@ function buildTicker(data: CityStatusResponse): TickerItem[] {
   // Status headline
   items.push({
     id: "status",
-    text: `JAIPUR STATUS: ${data.status.label.toUpperCase()} · ${data.analysis.activeSources}/4 feeds active`,
+    text: `JAIPUR: ${data.analysis.scoreAvailable ? data.status.label.toUpperCase() : "PARTIAL COVERAGE"} · ${data.analysis.activeSources}/4 feeds active · Transport and reports are simulated`,
     type: "status",
   });
 
@@ -31,7 +31,7 @@ function buildTicker(data: CityStatusResponse): TickerItem[] {
   for (const alert of data.alerts) {
     items.push({
       id: `alert-${alert.id}`,
-      text: `▲ ${alert.title}: ${alert.summary}`,
+      text: `▲ ${alert.simulated ? "SIMULATED · " : ""}${alert.title}: ${alert.summary}`,
       type: "alert",
     });
   }
@@ -70,8 +70,6 @@ export function NarrativeTicker({ data }: { data: CityStatusResponse }) {
       className="narrative-ticker"
       role="marquee"
       aria-label="Live civic updates"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
     >
       <div className="ticker-badge">
         <span className="ticker-live-dot" />

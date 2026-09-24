@@ -27,8 +27,14 @@ async function main() {
       !body.includes(secret),
       "Server key must not appear in API responses",
     );
-    assert.equal(response.status, 200, route);
     const data = JSON.parse(body);
+    if (response.status === 502 && ["weather", "air-quality"].includes(route)) {
+      assert.equal(data.status, "unavailable");
+      assert.deepEqual(data.events, []);
+      console.log(`DEGRADED: ${route} upstream unavailable; no fabricated fallback.`);
+    } else {
+      assert.equal(response.status, 200, route);
+    }
     console.log(
       JSON.stringify({
         route,
@@ -62,7 +68,8 @@ async function main() {
     assert.equal((await upsertPossibleLinks([link]))[0].id, id);
     const statuses = await getSourceStatuses();
     assert.equal(statuses.length, 4);
-    assert.ok(statuses.every((s) => s.lastAttempt && s.lastSuccess));
+    assert.ok(statuses.every((s) => s.lastAttempt));
+    assert.ok(statuses.filter(s => s.status !== "unavailable").every(s => s.lastSuccess));
     console.log(
       "PASS: Supabase event write/read, possible-link write, four saved source statuses.",
     );

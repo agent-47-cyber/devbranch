@@ -2,7 +2,12 @@ import { fetchAirQualityEvents } from "@/lib/airQuality";
 import { getJaipurArea } from "@/lib/areas";
 import { createCityStatus } from "@/lib/cityStatus";
 import { findPossibleLinks } from "@/lib/findLinks";
-import { defaultReplayDay, getReplayEvents, getReplaySteps, replaySteps } from "@/lib/replay";
+import {
+  defaultReplayDay,
+  getReplayEvents,
+  getReplaySteps,
+  replaySteps,
+} from "@/lib/replay";
 import { createAlerts } from "@/lib/alerts";
 import {
   getLocalReportRecords,
@@ -218,6 +223,11 @@ export function analyzeStatus(
       .sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
       .slice(-8),
     mapEvents: [...mapped.values()],
+    observationHistory: events.filter(
+      (event) =>
+        primaryTypes.includes(event.type) &&
+        Date.parse(event.observedAt) >= Date.parse(at) - 3 * 60 * 60_000,
+    ),
     sources: responses.map((response) => ({
       source: response.source,
       status: response.status,

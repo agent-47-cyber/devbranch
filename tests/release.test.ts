@@ -1,0 +1,46 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { getReplayStatus } from "../lib/status";
+import { getReplayEvents, getReplaySteps } from "../lib/replay";
+
+test("all 18 replay frames expose only ingested history through the chosen instant", async () => {
+  for (let day = 0; day < 3; day++) {
+    const signatures = new Set<string>();
+    for (let step = 0; step < 6; step++) {
+      const status = await getReplayStatus(step, day);
+      const input = new Map(
+        getReplayEvents(step, day).map((event) => [event.id, event]),
+      );
+      assert.equal(status.updatedAt, getReplaySteps(day)[step].at);
+      assert.equal(status.sources.length, 4);
+      assert.ok(
+        status.sources.every((source) => source.status === "simulated"),
+      );
+      for (const event of status.observationHistory) {
+        assert.equal(event.value, input.get(event.id)?.value);
+        assert.equal(event.observedAt, input.get(event.id)?.observedAt);
+        assert.ok(Date.parse(event.observedAt) <= Date.parse(status.updatedAt));
+        assert.ok(
+          Date.parse(event.observedAt) >=
+            Date.parse(status.updatedAt) - 3 * 60 * 60_000,
+        );
+      }
+      for (const alert of status.alerts) {
+        assert.equal(input.get(alert.eventId)?.value, alert.value);
+        assert.ok(alert.simulated);
+      }
+      signatures.add(
+        JSON.stringify(
+          Object.values(status.current).map((event) => [
+            event?.value,
+            event?.observedAt,
+          ]),
+        ),
+      );
+    }
+    assert.ok(
+      signatures.size > 1,
+      "Replay changes observations, not just a UI clock",
+    );
+  }
+});

@@ -113,6 +113,7 @@ export interface CityStatusResponse {
   alerts: CivicAlert[];
   recentUpdates: RecentUpdate[];
   mapEvents: CityEvent[];
+  observationHistory: CityEvent[];
   sources: SourceStatusRecord[];
   analysis: {
     activeSources: number;

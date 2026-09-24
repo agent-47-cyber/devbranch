@@ -1,5 +1,4 @@
 "use client";
-// @refresh reset
 import { useEffect, useState } from "react";
 import {
   Circle,
@@ -10,7 +9,7 @@ import {
 } from "react-leaflet";
 import { divIcon } from "leaflet";
 import { findNearestJaipurArea, JAIPUR_AREAS } from "@/lib/areas";
-import { eventLabel, timeLabel } from "@/lib/display";
+import { timeLabel } from "@/lib/display";
 import {
   currentIncidentCount,
   incidentTitle,
@@ -34,7 +33,6 @@ interface Props {
   mode: "live" | "replay";
   at: string;
 }
-
 function MapInteraction({
   area,
   onSelect,
@@ -44,18 +42,16 @@ function MapInteraction({
 }) {
   const map = useMapEvents({
     click(event) {
-      onSelect(
-        findNearestJaipurArea(event.latlng.lat, event.latlng.lng).name,
-      );
+      onSelect(findNearestJaipurArea(event.latlng.lat, event.latlng.lng).name);
     },
   });
   useEffect(() => {
     const point = JAIPUR_AREAS.find((candidate) => candidate.name === area);
-    if (!point) return;
-    map.panInside([point.latitude, point.longitude], {
-      paddingTopLeft: [24, 24],
-      paddingBottomRight: [24, 24],
-    });
+    if (point)
+      map.panInside([point.latitude, point.longitude], { padding: [85, 55] });
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
   }, [area, map]);
   return null;
 }
@@ -70,58 +66,35 @@ export function CityMap({
   at,
 }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
-  const [showPopup, setShowPopup] = useState(true);
   const [tileError, setTileError] = useState(false);
   const area = selected ?? activeArea ?? status.area ?? "Malviya Nagar";
-  const report = latestAreaEvent(events, area, "local_report");
-  const transport = latestAreaEvent(events, area, "transport");
-  const weather = latestAreaEvent(events, area, "weather");
-  const air = latestAreaEvent(events, area, "air_quality");
-  const reportCurrent = report ? isCurrentMapEvent(report, at) : false;
-  const transportCurrent = transport ? isCurrentMapEvent(transport, at) : false;
-  const linked = possibleLink?.area === area;
   const point = JAIPUR_AREAS.find((candidate) => candidate.name === area);
-  const incidentCount = currentIncidentCount(events, area, at);
-  const areaSummary = linked
+  const linked = possibleLink?.area === area;
+  const count = currentIncidentCount(events, area, at);
+  const readings = (
+    ["local_report", "transport", "weather", "air_quality"] as const
+  ).map((source) => ({ source, event: latestAreaEvent(events, area, source) }));
+  const summary = linked
     ? possibleLink.summary
-    : reportCurrent && report
-      ? `${report.value} ${report.type} reports were observed in ${area} within the current 30-minute window.`
-      : `No current local incident report is available for ${area}. Older simulated reports are shown below for context only.`;
-
-  const zoneHealthScore = linked
-    ? 58
-    : incidentCount > 0
-      ? 72
-      : area === "Vaishali Nagar"
-        ? 93
-        : area === "Jagatpura"
-          ? 89
-          : area === "Mansarovar"
-            ? 84
-            : 87;
-
-  const zoneStatus = linked
-    ? "POSSIBLE LINK"
-    : incidentCount > 0
-      ? "WATCH"
-      : "NORMAL";
-
-  const coordinatesText = point
-    ? `${point.latitude.toFixed(4)}° N, ${point.longitude.toFixed(4)}° E`
-    : "26.8800° N, 75.8000° E";
-
+    : count
+      ? `${count} aggregated simulated reports in the current 30-minute window. Each reading includes its source and observation time.`
+      : `No current local report is available for ${area}. This is a coverage gap, not an all-clear.`;
   return (
-    <section className="map-section" id="map" aria-label="Jaipur neighborhood map">
+    <section
+      className="map-section"
+      id="map"
+      aria-label="Jaipur neighborhood map"
+    >
       <div className="map-topline">
         <div>
           <p className="eyebrow">Explore Jaipur</p>
           <h3>One city. Five closer views.</h3>
         </div>
-        <span className="map-topline-count">05 MONITORED AREAS</span>
+        <span className="map-topline-count">05 AREAS</span>
       </div>
       <div className="map-frame">
         <MapContainer
-          center={[26.88, 75.8]}
+          center={[26.9, 75.8]}
           zoom={12}
           className="leaflet-map"
           scrollWheelZoom={false}
@@ -134,254 +107,132 @@ export function CityMap({
               load: () => setTileError(false),
             }}
           />
-          <MapInteraction area={area} onSelect={(name) => { setSelected(name); setShowPopup(true); }} />
+          <MapInteraction area={area} onSelect={setSelected} />
           {point && (
             <Circle
               center={[point.latitude, point.longitude]}
               radius={1100}
               interactive={false}
               pathOptions={{
-                color: linked ? "#ba5733" : "#2153c6",
+                color: linked ? "#ba5733" : "#2455cf",
                 weight: 2,
-                fillColor: linked ? "#ba5733" : "#2153c6",
-                fillOpacity: 0.12,
+                fillOpacity: 0.1,
               }}
             />
           )}
           {JAIPUR_AREAS.map((candidate) => {
-            const count = currentIncidentCount(events, candidate.name, at);
-            const chosen = candidate.name === area;
-            const linkedArea = possibleLink?.area === candidate.name;
+            const reports = currentIncidentCount(events, candidate.name, at);
             return (
               <Marker
                 key={candidate.name}
-                position={[candidate.latitude, candidate.longitude]}
                 title={candidate.name}
                 alt={candidate.name}
+                position={[candidate.latitude, candidate.longitude]}
                 icon={divIcon({
                   className: "area-marker",
-                  html: `<div class="area-pin ${chosen ? "selected" : ""} ${count ? "has-incidents" : ""} ${linkedArea ? "has-link" : ""}"><span class="area-pin-dot"></span><span class="area-pin-name">${candidate.name}</span>${count ? `<span class="area-pin-count">${count}</span>` : ""}</div>`,
+                  html: `<div class="area-pin ${candidate.name === area ? "selected" : ""} ${reports ? "has-incidents" : ""}"><span class="area-pin-dot"></span><span class="area-pin-name">${candidate.name}</span>${reports ? `<span class="area-pin-count">${reports}</span>` : ""}</div>`,
                   iconSize: [150, 42],
                   iconAnchor: [75, 21],
                 })}
-                eventHandlers={{ click: () => { setSelected(candidate.name); setShowPopup(true); } }}
+                eventHandlers={{ click: () => setSelected(candidate.name) }}
               />
             );
           })}
         </MapContainer>
-
-        {/* Floating White Colour Box Map Popup (Image 5 Inspector) */}
-        {showPopup ? (
-          <div className="map-white-popup" role="region" aria-label="Zone Inspector">
-            <div className="map-white-popup-header">
-              <div>
-                <span className="map-popup-kicker">ZONE METRIC INSPECTOR</span>
-                <h4 className="map-popup-title">{area}</h4>
-              </div>
-              <button
-                className="map-popup-close"
-                onClick={() => setShowPopup(false)}
-                aria-label="Dismiss inspector"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="map-popup-stat-row">
-              <div>
-                <span className="map-popup-label">HEALTH SCORE:</span>
-                <strong className="map-popup-score">
-                  {zoneHealthScore} <small>/ 100</small>
-                </strong>
-              </div>
-              <div>
-                <span className="map-popup-label">OPERATIONAL STATUS:</span>
-                <span className={`map-popup-status-badge ${zoneStatus.toLowerCase().replace(" ", "-")}`}>
-                  {zoneStatus}
-                </span>
-              </div>
-            </div>
-
-            <div className="map-popup-coords">
-              <span>COORDINATES:</span>
-              <code>{coordinatesText}</code>
-            </div>
-
-            <p className="map-popup-summary">{areaSummary}</p>
-
-            <div className="map-popup-readings">
-              {/* 01 / LOCAL REPORTS */}
-              <div className="map-popup-card">
-                <span className="map-popup-card-tag">01 / LOCAL REPORTS</span>
-                {report ? (
-                  <>
-                    <strong className="map-popup-card-title">{incidentTitle(report)}</strong>
-                    <div className="map-popup-card-meta">
-                      <b>{report.value}</b> aggregated reports · {report.simulated ? "Simulated" : "Live"}
-                    </div>
-                    <small className="map-popup-card-time">
-                      {reportCurrent ? "Inside 30-min window" : "Older record"} · {timeLabel(report.observedAt)} IST
-                    </small>
-                  </>
-                ) : (
-                  <p className="map-popup-empty">No report observations for this area.</p>
-                )}
-              </div>
-
-              {/* 02 / MOVEMENT */}
-              <div className="map-popup-card">
-                <span className="map-popup-card-tag">02 / MOVEMENT</span>
-                {transport ? (
-                  <>
-                    <strong className="map-popup-card-title">{incidentTitle(transport)}</strong>
-                    <div className="map-popup-card-meta">
-                      <b>{transport.value}</b> {transport.unit} · Simulated
-                    </div>
-                    <small className="map-popup-card-time">
-                      {transportCurrent ? "Inside 30-min window" : "Older record"} · {timeLabel(transport.observedAt)} IST
-                    </small>
-                  </>
-                ) : (
-                  <p className="map-popup-empty">No transport observation for this area.</p>
-                )}
-              </div>
-            </div>
-
-            {/* Environmental Weather & Air Quality */}
-            <div className="map-popup-env-grid">
-              <div className="map-popup-env-item">
-                <span className="map-popup-env-label">WEATHER</span>
-                <strong className="map-popup-env-val">
-                  {weather ? `${weather.value} ${weather.unit}` : "25°C"}
-                </strong>
-                <small>{weather ? eventLabel(weather) : "Feed limited"}</small>
-              </div>
-              <div className="map-popup-env-item">
-                <span className="map-popup-env-label">AIR QUALITY</span>
-                <strong className="map-popup-env-val">
-                  {air ? `${air.value} ${air.unit}` : "86 US AQI"}
-                </strong>
-                <small>{air ? eventLabel(air) : "Feed limited"}</small>
-              </div>
-            </div>
-
-            {linked && (
-              <div className="map-popup-link-box">
-                <strong>Possible Link · {Math.round(possibleLink.linkScore * 100)}% association score</strong>
-                <span>These signals may be related; this does not establish a cause.</span>
-              </div>
-            )}
-
-            <button
-              className="map-popup-dismiss-btn"
-              onClick={() => setShowPopup(false)}
-            >
-              Dismiss inspector
-            </button>
-          </div>
-        ) : (
-          <button
-            className="map-popup-reopen-btn"
-            onClick={() => setShowPopup(true)}
-          >
-            Inspect {area}
-          </button>
-        )}
-
         <div className="map-label">
           <i />
-          {mode === "replay" ? "SCENARIO REPLAY" : "LATEST AVAILABLE FEEDS"}
+          {mode === "replay" ? "SIMULATED REPLAY" : "LATEST OBSERVATIONS"}
         </div>
-        <div className="map-instruction">Select a marker or tap the map</div>
         {tileError && (
           <p className="map-warning" role="status">
-            Map tiles are temporarily unavailable. Use the area selector below.
+            Map tiles unavailable. The area buttons and readings still work.
           </p>
         )}
       </div>
       <div className="map-area-bar" aria-label="Select a neighborhood">
-        {JAIPUR_AREAS.map((candidate) => {
-          const count = currentIncidentCount(events, candidate.name, at);
-          return (
-            <button
-              key={candidate.name}
-              className={area === candidate.name ? "is-selected" : ""}
-              aria-pressed={area === candidate.name}
-              onClick={() => { setSelected(candidate.name); setShowPopup(true); }}
-            >
-              <span>{candidate.name}</span>
-              <small>{count ? `${count} current reports` : "No current reports"}</small>
-            </button>
-          );
-        })}
+        {JAIPUR_AREAS.map((candidate) => (
+          <button
+            key={candidate.name}
+            className={candidate.name === area ? "is-selected" : ""}
+            aria-pressed={candidate.name === area}
+            onClick={() => setSelected(candidate.name)}
+          >
+            <span>{candidate.name}</span>
+            <small>
+              {currentIncidentCount(events, candidate.name, at)} current reports
+            </small>
+          </button>
+        ))}
       </div>
       <div className="map-details" aria-live="polite">
         <div className="map-details-heading">
           <div>
-            <p className="eyebrow">Neighborhood view / {mode === "replay" ? "Replay" : "Live"}</p>
+            <p className="eyebrow">Selected neighborhood / {mode}</p>
             <h3>{area}</h3>
           </div>
-          <span className={`map-area-status ${linked ? "is-linked" : reportCurrent ? "is-current" : ""}`}>
-            {linked ? "Possible link" : incidentCount ? "Current reports" : "No current reports"}
+          <span
+            className={`map-area-status ${linked ? "is-linked" : count ? "is-current" : ""}`}
+          >
+            {linked
+              ? "Possible link"
+              : count
+                ? "Simulated reports"
+                : "Limited coverage"}
           </span>
         </div>
-        <p className="map-area-summary">{areaSummary}</p>
+        <p className="map-area-summary">{summary}</p>
         {selected && (
           <button className="map-follow" onClick={() => setSelected(null)}>
             Follow the story ↗
           </button>
         )}
         <div className="map-detail-grid">
-          <div className={`map-detail-block map-detail-incidents ${activeSource === "local_report" ? "is-highlighted" : ""}`}>
-            <span className="map-detail-kicker">01 / LOCAL REPORTS</span>
-            {report ? (
-              <>
-                <strong>{incidentTitle(report)}</strong>
-                <p><b>{report.value}</b> aggregated reports · {report.simulated ? "Simulated" : "Live"}</p>
-                <small>{reportCurrent ? "Inside 30-minute window" : "Older record · excluded from current analysis"} · {timeLabel(report.observedAt)} IST</small>
-              </>
-            ) : (
-              <p>No report observations for this area.</p>
-            )}
-          </div>
-          <div className={`map-detail-block ${activeSource === "transport" ? "is-highlighted" : ""}`}>
-            <span className="map-detail-kicker">02 / MOVEMENT</span>
-            {transport ? (
-              <>
-                <strong>{incidentTitle(transport)}</strong>
-                <p><b>{transport.value}</b> {transport.unit} · Simulated</p>
-                <small>{transportCurrent ? "Inside 30-minute window" : "Older record · excluded from current analysis"} · {timeLabel(transport.observedAt)} IST</small>
-              </>
-            ) : (
-              <p>No transport observation for this area.</p>
-            )}
-          </div>
-        </div>
-        <div className="map-environment">
-          {[weather, air].map((event, index) => (
-            <div key={event?.id ?? index}>
-              <span>{index === 0 ? "WEATHER" : "AIR QUALITY"}</span>
+          {readings.map(({ source, event }) => (
+            <article
+              key={source}
+              className={`map-detail-block ${activeSource === source ? "is-highlighted" : ""}`}
+            >
+              <span className="map-detail-kicker">
+                {source.replaceAll("_", " ")}
+              </span>
               {event ? (
-                <strong>
-                  {event.value} {event.unit}
-                  <small> {eventLabel(event)} · {isCurrentMapEvent(event, at) ? "Current" : "Older"} · {timeLabel(event.observedAt)} IST</small>
-                </strong>
+                <>
+                  <strong>
+                    {source === "weather"
+                      ? "Rainfall"
+                      : source === "air_quality"
+                        ? "US air quality index"
+                        : incidentTitle(event)}
+                  </strong>
+                  <p>
+                    <b>{event.value}</b> {event.unit}
+                  </p>
+                  <small>
+                    {event.simulated ? "Simulated" : "Public feed"} ·{" "}
+                    {isCurrentMapEvent(event, at)
+                      ? "Current"
+                      : "Older · outside window"}
+                    <br />
+                    {timeLabel(event.observedAt)} IST
+                  </small>
+                </>
               ) : (
-                <strong>No area reading<small>Feed coverage is limited here</small></strong>
+                <p>No area reading available</p>
               )}
-            </div>
+            </article>
           ))}
         </div>
         {linked && (
           <p className="map-link">
-            Possible Link · {Math.round(possibleLink.linkScore * 100)}% association score
-            <span>These signals may be related; this does not establish a cause.</span>
+            Possible Link · {Math.round(possibleLink.linkScore * 100)}%
+            association score
+            <span>Possible connection, not a confirmed cause.</span>
           </p>
         )}
       </div>
       <div className="map-footnote">
-        <span>{mode === "replay" ? "Recorded scenario" : "Latest available observations"} · {timeLabel(at)} IST</span>
-        <span>Local reports and transport are simulated.</span>
+        <span>View at {timeLabel(at)} IST</span>
+        <span>Transport and local reports are simulated.</span>
       </div>
     </section>
   );

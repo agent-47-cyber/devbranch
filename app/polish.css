@@ -1,0 +1,254 @@
+/* Final responsive layer: content determines height, units retain readable tracking. */
+.kpi-grid > *,
+.trend-charts-grid > *,
+.story-layout > *,
+.map-detail-grid > *,
+.signal-grid > * {
+  min-width: 0;
+}
+.kpi-card-header,
+.kpi-card-footer,
+.trend-card-top,
+.trend-card-footer,
+.signal-footer,
+.map-details-heading,
+.map-footnote {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.kpi-card-value-wrap,
+.signal-value,
+.scene-reading {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.signal-value span,
+.scene-reading span,
+.kpi-card-unit {
+  letter-spacing: normal;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+.kpi-card {
+  border-top: 3px solid #2455cf;
+}
+.kpi-card-footer {
+  line-height: 1.6;
+}
+.trend-card {
+  min-height: 300px;
+}
+.trend-card-title,
+.kpi-card-title {
+  line-height: 1.5;
+}
+.observation-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-block: 20px;
+}
+.observation-empty {
+  padding: 28px 0;
+  color: #526875;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.chart-readings {
+  color: #526875;
+  font-size: 12px;
+  margin-top: 16px;
+}
+.chart-readings summary {
+  cursor: pointer;
+  padding-block: 8px;
+}
+.chart-readings ul {
+  padding: 12px 0;
+  max-height: 180px;
+  overflow: auto;
+  line-height: 1.8;
+}
+.incident-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 14px;
+}
+.incident-observation {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px;
+  background: #f8fafc;
+  min-width: 0;
+}
+.incident-observation-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 11px;
+  color: #526875;
+}
+.incident-observation h3 {
+  font-size: 18px;
+  line-height: 1.4;
+  margin-bottom: 5px;
+}
+.incident-observation > p {
+  font-size: 13px;
+  color: #526875;
+}
+.incident-observation > strong {
+  display: block;
+  margin-block: 18px;
+  font-size: 36px;
+  letter-spacing: -0.03em;
+}
+.incident-observation strong small {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+.incident-note {
+  border-top: 1px solid #dde4e7;
+  padding-top: 12px;
+}
+.incidents-filters {
+  flex-wrap: wrap;
+}
+.map-section .map-frame {
+  min-height: 0 !important;
+  height: clamp(300px, 40vw, 440px) !important;
+  border-radius: 0;
+}
+.map-detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.map-detail-block {
+  overflow-wrap: anywhere;
+}
+.map-label {
+  pointer-events: none;
+  max-width: calc(100% - 80px);
+}
+.map-topline {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.story-map {
+  position: relative;
+  top: auto;
+}
+.story-scene {
+  min-height: 310px;
+  padding-block: 36px;
+}
+.ticker-track-wrapper {
+  min-width: 0;
+}
+.narrative-ticker:hover .ticker-track {
+  animation-play-state: paused;
+}
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+input:focus-visible {
+  outline: 3px solid #2455cf;
+  outline-offset: 4px;
+}
+@media (max-width: 1100px) {
+  .story-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .story-scenes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .story-scene h3 {
+    font-size: clamp(28px, 4vw, 42px);
+  }
+  .story-scene {
+    min-height: 0;
+  }
+}
+@media (max-width: 640px) {
+  .telemetry-cockpit-shell {
+    padding-inline: 5vw;
+    margin-top: 24px;
+  }
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .kpi-card {
+    padding: 16px 12px;
+  }
+  .kpi-card-value {
+    font-size: 32px;
+  }
+  .kpi-card-unit {
+    font-size: 11px;
+  }
+  .kpi-card-title {
+    font-size: 10px;
+  }
+  .kpi-card-footer {
+    font-size: 11px;
+  }
+  .trend-card {
+    padding: 18px;
+    min-height: 0;
+  }
+  .trend-card-top {
+    align-items: flex-start;
+  }
+  .story-scenes {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .map-details {
+    padding: 20px 16px;
+  }
+  .map-details-heading h3 {
+    font-size: 25px;
+  }
+  .map-detail-grid {
+    gap: 12px;
+  }
+  .map-detail-block {
+    padding: 12px;
+  }
+  .map-detail-block strong {
+    font-size: 14px;
+  }
+  .map-area-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .map-area-bar button {
+    min-width: 0;
+    white-space: normal;
+  }
+  .section-heading {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .section-heading h2 {
+    font-size: clamp(28px, 8vw, 42px);
+    overflow-wrap: anywhere;
+  }
+  .signal-meta {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track,
+  .incidents-pulse-dot {
+    animation: none !important;
+  }
+  .ticker-track-wrapper {
+    overflow-x: auto;
+  }
+}

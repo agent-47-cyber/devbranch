@@ -127,8 +127,8 @@ export function WhatsHappening({ data }: { data: CityStatusResponse }) {
                 <span>{event.unit}</span>
               </p>
               <p className="scene-description">
-                {event.type === "waterlogging"
-                  ? "Waterlogging reports"
+                {event.source === "local_report"
+                  ? `${event.type} reports`
                   : event.source === "transport"
                     ? "Average transport delay"
                     : "Modelled rainfall"}{" "}

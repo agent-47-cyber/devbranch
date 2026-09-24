@@ -18,7 +18,6 @@ import { CivicTelemetryDashboard } from "@/components/CivicTelemetryDashboard";
 import { ActiveIncidents } from "@/components/ActiveIncidents";
 
 import { NarrativeTicker } from "@/components/NarrativeTicker";
-import { SensorOverlay } from "@/components/SensorOverlay";
 import { timeLabel } from "@/lib/display";
 import type { CityStatusResponse } from "@/types/city";
 
@@ -237,7 +236,6 @@ export function CityExperience() {
             />
             <WhatsHappening data={data} />
 
-            <SensorOverlay />
             <DataSources
               sources={data.sources}
               mode={mode}

@@ -106,3 +106,13 @@ The intended `/api/status` response is:
 ```
 
 This contract can be refined only when implementation requires it, not casually replaced.
+
+### Final release additions
+
+`observationHistory: CityEvent[]` contains normalized primary observations from
+the three hours ending at `updatedAt`, excludes future readings and unavailable
+sources, and provides the chart history. Charts must not synthesize missing points.
+`alerts: CivicAlert[]` contains current threshold crossings with the originating
+event ID, source, value, unit, threshold, timestamp, and simulation label.
+`analysis.scoreAvailable` is the display gate for the internal score everywhere.
+The full implemented response type is maintained in `types/city.ts`.

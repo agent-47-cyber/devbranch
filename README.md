@@ -1,5 +1,13 @@
 # CityPulse
 
+## Release verification notes
+
+- Trend charts use normalized observations from the last three hours, never generated history. Empty or single-point histories are explicitly labelled.
+- Map selections and report cards use the same timestamped feed records. No neighborhood score, traffic speed, dispatch status, or sensor reading is invented.
+- Weather/AQI provider failures show unavailable; no synthetic weather fallback is presented as a public reading. Transport and local reports remain intentionally simulated.
+- Three replay days contain six moments each. The same normalization, rolling-window analysis, threshold checks and summary rules run for every frame without writing replay data into live storage.
+- `npm test`, `npm run lint`, `npm run build`, and `npm run test:integration` cover analysis, failure handling, API contracts and storage. Integration reports upstream outages as **DEGRADED**, not as verified live readings.
+
 CityPulse is a civic signal dashboard for Jaipur built for AmiHacks Problem Statement 2. It combines fragmented city feeds into one resident-friendly view, detects unusual changes within a rolling time window, and surfaces cautious **possible connections** between events occurring near the same place and time.
 
 **Live application:** [citypulse-iota-bice.vercel.app](https://citypulse-iota-bice.vercel.app)
