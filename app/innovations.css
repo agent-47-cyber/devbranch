@@ -705,6 +705,8 @@
 }
 .sensor-value-row small {
   font-size: 12px;
+  font-weight: 400;
+  letter-spacing: normal;
   color: var(--muted);
 }
 .sensor-bar-track {
