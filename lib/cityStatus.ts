@@ -49,22 +49,23 @@ export function createCityStatus(
     .filter((e) => e.source === "local_report")
     .reduce((sum, e) => sum + e.value, 0);
 
-  // Component Scores (0-100) mapped from observed values
-  const mobilityScore = delayEvent ? Math.max(0, 100 - delayEvent.value * 3) : 100;
-  const aqiScore = aqiEvent ? Math.max(0, 100 - Math.round(aqiEvent.value / 3.5)) : 100;
-  const weatherScore = rainEvent ? Math.max(0, 100 - rainEvent.value * 5) : 100;
-  const incidentsScore = Math.max(0, 100 - Math.round(reportsCount * 6.67));
+  // Baseline urban drag accounts for natural city friction (atmospheric AQI, transit, daily intake)
+  // A living city never has 100/100; healthy baseline operates realistically at ~88-92.
+  const aqiFriction = aqiEvent ? Math.max(2, Math.min(18, Math.round((aqiEvent.value - 30) * 0.1))) : 4;
+  const transitFriction = delayEvent ? Math.max(2, Math.min(20, Math.round(delayEvent.value * 0.8))) : 3;
+  const rainFriction = rainEvent ? Math.min(15, Math.round(rainEvent.value * 2.5)) : 0;
+  const civicFriction = Math.max(2, Math.min(15, Math.round(reportsCount * 0.4)));
 
-  // Weighted health across current civic signals
-  // Renormalized to 100% since Cleanliness (10%) is excluded from current feeds. (Sum = 90)
-  const score = Math.round(
-    mobilityScore * (30 / 90) +
-    aqiScore * (25 / 90) +
-    weatherScore * (20 / 90) +
-    incidentsScore * (15 / 90)
-  );
-  
+  const urbanFriction = Math.max(7, Math.min(30, aqiFriction + transitFriction + rainFriction + civicFriction));
+
   const strongestLink = links[0];
+  const linkImpact = strongestLink ? strongestLink.linkScore * 35 : 0;
+  const signalImpact = Math.min(25, unusualEvents.length * 4.5);
+
+  // Score Formula: 100 Base - Natural Friction - Active Anomalies - Linked Cascades
+  const score = Math.round(
+    Math.max(15, Math.min(94, 100 - urbanFriction - linkImpact - signalImpact))
+  );
 
   return {
     score,
