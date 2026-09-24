@@ -3,6 +3,7 @@
 @import "./replay-alerts.css";
 @import "./innovations.css";
 @import "./telemetry.css";
+@import "./polish.css";
 
 :root {
   --paper: #f6f4ee;
