@@ -161,37 +161,24 @@ export function WhatsHappening({ data }: { data: CityStatusResponse }) {
               </p>
             </article>
           )}
-          <article
-            data-scene={storyEvents.length}
-            className={`story-scene story-resolution ${active === storyEvents.length ? "is-active" : ""}`}
-          >
-            <p className="eyebrow">
-              {link
-                ? "Together, in time and place"
-                : "Keeping the picture honest"}
-            </p>
-            <h3>
-              {link
-                ? "These events may be related."
-                : data.analysis.scoreAvailable
-                  ? "No strong connection detected."
-                  : "Not enough evidence yet."}
-            </h3>
-            <p>
-              {link
-                ? "Unusual rain, reports and transport delays share the same area and a short time window."
-                : data.analysis.scoreAvailable
-                  ? "A possible link appears only when multiple unusual signals align. A quiet view is a useful result too."
-                  : data.analysis.explanation}
-            </p>
-            {link && (
+          {link && (
+            <article
+              data-scene={storyEvents.length}
+              className={`story-scene story-resolution ${active === storyEvents.length ? "is-active" : ""}`}
+            >
+              <p className="eyebrow">Together, in time and place</p>
+              <h3>These events may be related.</h3>
+              <p>
+                Unusual rain, reports and transport delays share the same area
+                and a short time window.
+              </p>
               <span className="resolution-score">
                 {Math.round(link.linkScore * 100)}
                 <small>% Possible Link</small>
               </span>
-            )}
-            <small>Association does not establish cause.</small>
-          </article>
+              <small>Association does not establish cause.</small>
+            </article>
+          )}
         </div>
       </div>
     </section>
