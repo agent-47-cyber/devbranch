@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { JAIPUR_AREAS } from "@/lib/areas";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CityArrival } from "@/components/CityArrival";
@@ -32,6 +33,7 @@ export function CityExperience() {
   const [framesByDay, setFramesByDay] = useState<Record<number, CityStatusResponse[]>>({});
   const frames = framesByDay[replayDay] ?? [];
   const [live, setLive] = useState<CityStatusResponse | null>(null);
+  const [area, setArea] = useState("Malviya Nagar");
   const [error, setError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -136,7 +138,7 @@ export function CityExperience() {
           if (!controller.signal.aborted)
             setFramesByDay(Object.fromEntries(next));
         } else {
-          const next = await read("/api/status?mode=live");
+          const next = await read(`/api/status?mode=live&area=${encodeURIComponent(area)}`);
           if (!controller.signal.aborted) setLive(next);
         }
         if (!controller.signal.aborted) setError(null);
@@ -160,9 +162,9 @@ export function CityExperience() {
       controller.abort();
       if (timer) window.clearInterval(timer);
     };
-    // A mode/day/retry change owns one request lifecycle; the slider uses cached frames.
+    // A mode/day/retry/area change owns one request lifecycle; the slider uses cached frames.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, retry, replayDay]);
+  }, [mode, retry, replayDay, area]);
 
   useEffect(() => {
     if (!playing || mode !== "replay") return;
@@ -227,6 +229,23 @@ export function CityExperience() {
               />
             )}
             <CivicAlerts alerts={data.alerts} mode={mode} />
+            {mode === "live" && (
+              <div className="area-switcher-bar">
+                <span className="area-switcher-label">Viewing area</span>
+                <div className="area-switcher-pills" role="group" aria-label="Select neighbourhood">
+                  {JAIPUR_AREAS.map((a) => (
+                    <button
+                      key={a.name}
+                      className={`area-pill${area === a.name ? " active" : ""}`}
+                      onClick={() => { setArea(a.name); setLive(null); }}
+                      aria-pressed={area === a.name}
+                    >
+                      {a.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <CivicTelemetryDashboard data={data} />
             <ActiveIncidents data={data} />
             <CurrentSituation

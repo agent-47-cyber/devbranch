@@ -3,11 +3,67 @@
    High-density civic intelligence cockpit & active incident feed
    ═══════════════════════════════════════════════════════════════ */
 
+/* ── Area Switcher Bar ── */
+.area-switcher-bar {
+  max-width: 1600px;
+  margin: 0 auto 0;
+  padding: 16px 5vw;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.area-switcher-label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.area-switcher-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.area-pill {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 18px;
+  border-radius: 999px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.area-pill:hover {
+  border-color: #94a3b8;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+.area-pill.active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+  font-weight: 600;
+}
+
 .telemetry-cockpit-shell {
   max-width: 1600px;
   margin: 36px auto 0;
   padding: 0 5vw;
 }
+
 
 /* ── KPI 4-Card Grid ── */
 .kpi-grid {

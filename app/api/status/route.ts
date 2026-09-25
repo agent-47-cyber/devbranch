@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { addGroqBrief } from "@/lib/groq.server";
 import { defaultReplayDay, replayDays } from "@/lib/replay";
+import { JAIPUR_AREAS } from "@/lib/areas";
+
+const areaNames = JAIPUR_AREAS.map((a) => a.name) as [string, ...string[]];
 
 const querySchema = z.object({
   mode: z.enum(["live", "replay"]).default("live"),
@@ -13,6 +16,7 @@ const querySchema = z.object({
     .min(0)
     .max(replayStepCount - 1)
     .default(replayStepCount - 1),
+  area: z.enum(areaNames).default("Malviya Nagar"),
 });
 
 export async function GET(request: Request) {
@@ -22,11 +26,12 @@ export async function GET(request: Request) {
       mode: searchParams.get("mode") ?? undefined,
       step: searchParams.get("step") ?? undefined,
       day: searchParams.get("day") ?? undefined,
+      area: searchParams.get("area") ?? undefined,
     });
     const status =
       query.mode === "replay"
         ? await getReplayStatus(query.step, query.day)
-        : await getLiveStatus();
+        : await getLiveStatus(query.area);
 
     return NextResponse.json(await addGroqBrief(status), {
       headers: { "Cache-Control": "no-store" },
@@ -43,3 +48,4 @@ export async function GET(request: Request) {
     );
   }
 }
+

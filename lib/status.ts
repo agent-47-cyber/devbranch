@@ -41,12 +41,6 @@ import type {
   SourceStatusRecord,
 } from "@/types/city";
 
-const area = getJaipurArea("Malviya Nagar");
-const location = {
-  area: area.name,
-  latitude: area.latitude,
-  longitude: area.longitude,
-};
 const primaryTypes = [
   "rain",
   "aqi",
@@ -271,7 +265,15 @@ async function collect(
   return response;
 }
 
-export async function getLiveStatus(): Promise<CityStatusResponse> {
+export async function getLiveStatus(
+  areaName = "Malviya Nagar",
+): Promise<CityStatusResponse> {
+  const areaObj = getJaipurArea(areaName);
+  const location = {
+    area: areaObj.name,
+    latitude: areaObj.latitude,
+    longitude: areaObj.longitude,
+  };
   const responses = await Promise.all([
     collect("weather", "live", () => fetchWeatherEvents(location)),
     collect("air_quality", "live", () => fetchAirQualityEvents(location)),
