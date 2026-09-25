@@ -31,13 +31,11 @@ function ObservationChart({
   const last = points.at(-1);
   const first = points[0];
 
-  // Compute actual observed range from data, not a fixed 3h window
   const nowMs = Date.parse(at);
   const firstMs = first ? Date.parse(first.observedAt) : nowMs;
   const lastMs = last ? Date.parse(last.observedAt) : nowMs;
   const dataSpanMs = lastMs - firstMs;
 
-  // Add 10% padding on each side, minimum 10 min total window
   const padding = Math.max(dataSpanMs * 0.1, 5 * 60_000);
   const windowStart = firstMs - padding;
   const windowEnd = Math.max(lastMs + padding, windowStart + 10 * 60_000);
@@ -54,7 +52,6 @@ function ObservationChart({
     };
   });
 
-  // Compute trend direction for display
   let trend = "";
   if (points.length >= 2) {
     const diff = last!.value - first!.value;
@@ -79,7 +76,7 @@ function ObservationChart({
         </span>
       </div>
       <p className="trend-card-desc">
-        {last?.area ?? "Malviya Nagar"}
+        {last?.area ?? "—"}
         {points.length >= 2
           ? ` · ${spanLabel} observed (${timeLabel(first!.observedAt)} – ${timeLabel(last!.observedAt)} IST)`
           : points.length === 1
@@ -172,32 +169,41 @@ function ObservationChart({
   );
 }
 
-const DISPLAY_AREAS = ["Malviya Nagar", "Mansarovar", "Vaishali Nagar"] as const;
+/* ── Constants ── */
+const DISPLAY_AREAS = [
+  "Malviya Nagar",
+  "Mansarovar",
+  "Vaishali Nagar",
+  "Jagatpura",
+  "C-Scheme",
+] as const;
 
 const AREA_COLORS: Record<string, { rain: string; aqi: string }> = {
-  "Malviya Nagar": { rain: "#2455cf", aqi: "#b37721" },
-  "Mansarovar":    { rain: "#0891b2", aqi: "#7c3aed" },
-  "Vaishali Nagar":{ rain: "#059669", aqi: "#dc2626" },
+  "Malviya Nagar":  { rain: "#2455cf", aqi: "#b37721" },
+  "Mansarovar":     { rain: "#0891b2", aqi: "#7c3aed" },
+  "Vaishali Nagar": { rain: "#059669", aqi: "#dc2626" },
+  "Jagatpura":      { rain: "#d97706", aqi: "#be185d" },
+  "C-Scheme":       { rain: "#7c3aed", aqi: "#0f766e" },
 };
 
 export function CivicTelemetryDashboard({
   data,
+  area,
 }: {
   data: CityStatusResponse;
+  area?: string;
 }) {
   const history = data.observationHistory ?? [];
   const all = [...history, ...data.mapEvents];
 
-  // Latest reading per area per type from any event set
-  function latestForArea(area: string, source: string, type: string): CityEvent | null {
+  function latestForArea(areaName: string, source: string, type: string): CityEvent | null {
     return (
       all
-        .filter((e) => e.area === area && e.source === source && e.type === type)
+        .filter((e) => e.area === areaName && e.source === source && e.type === type)
         .sort((a, b) => Date.parse(b.observedAt) - Date.parse(a.observedAt))[0] ?? null
     );
   }
 
-  // Top summary KPI cards
   const aq = data.current.airQuality;
   const delay = data.current.transport;
   const sourceNote = (event: CityEvent | null) =>
@@ -239,12 +245,18 @@ export function CivicTelemetryDashboard({
     },
   ];
 
+  const sortedAreas = [...DISPLAY_AREAS].sort((a, b) => {
+    if (area && a === area) return -1;
+    if (area && b === area) return 1;
+    return 0;
+  });
+
   return (
     <section
       className="telemetry-cockpit-shell"
       aria-label="City readings and observed trends"
     >
-      {/* Top summary row */}
+      {/* Top summary KPI row */}
       <div className="kpi-grid">
         {topCards.map((card) => (
           <article key={card.title} className="kpi-card">
@@ -258,70 +270,74 @@ export function CivicTelemetryDashboard({
         ))}
       </div>
 
-      {/* Per-area observation sections */}
-      {DISPLAY_AREAS.map((area) => {
-        const colors = AREA_COLORS[area]!;
+      {/* Per-area observation sections — selected area floats to top */}
+      {sortedAreas.map((areaName) => {
+        const isSelected = area ? areaName === area : areaName === "Malviya Nagar";
+        const colors = AREA_COLORS[areaName]!;
         const rainEvents = history.filter(
-          (e) => e.source === "weather" && e.type === "rain" && e.area === area,
+          (e) => e.source === "weather" && e.type === "rain" && e.area === areaName,
         );
         const aqEvents = history.filter(
-          (e) => e.source === "air_quality" && e.type === "aqi" && e.area === area,
+          (e) => e.source === "air_quality" && e.type === "aqi" && e.area === areaName,
         );
-        const latestRain = latestForArea(area, "weather", "rain");
-        const latestAq = latestForArea(area, "air_quality", "aqi");
-        const latestDelay = latestForArea(area, "transport", "delay");
-        const latestReport = latestForArea(area, "local_report", "waterlogging")
-          ?? latestForArea(area, "local_report", "road blockage")
-          ?? latestForArea(area, "local_report", "traffic signal problem")
-          ?? latestForArea(area, "local_report", "power outage")
-          ?? latestForArea(area, "local_report", "fallen tree");
+        const latestRain = latestForArea(areaName, "weather", "rain");
+        const latestAq = latestForArea(areaName, "air_quality", "aqi");
+        const latestDelay = latestForArea(areaName, "transport", "delay");
+        const latestReport =
+          latestForArea(areaName, "local_report", "waterlogging") ??
+          latestForArea(areaName, "local_report", "road blockage") ??
+          latestForArea(areaName, "local_report", "traffic signal problem") ??
+          latestForArea(areaName, "local_report", "power outage") ??
+          latestForArea(areaName, "local_report", "fallen tree");
+
+        const rainLabel = latestRain?.simulated ? "Simulated" : latestRain ? "Live" : "No data";
+        const rainBadge = latestRain?.simulated ? "area-mini-sim" : latestRain ? "area-mini-live" : "area-mini-na";
+        const aqLabel = latestAq?.simulated ? "Simulated" : latestAq ? "Live" : "No data";
+        const aqBadge = latestAq?.simulated ? "area-mini-sim" : latestAq ? "area-mini-live" : "area-mini-na";
 
         return (
-          <div key={area} className="area-telemetry-block">
+          <div key={areaName} className={`area-telemetry-block${isSelected ? " area-selected" : ""}`}>
             <div className="area-telemetry-header">
               <div className="area-telemetry-name">
                 <span className="area-dot" style={{ background: colors.rain }} />
-                {area}
+                {areaName}
+                {isSelected && <span className="area-selected-badge">Viewing</span>}
               </div>
               <div className="area-mini-kpis">
                 <span className="area-mini-kpi">
                   <span className="area-mini-label">Rain</span>
                   <strong>{latestRain ? `${latestRain.value} mm` : "—"}</strong>
-                  <span className="area-mini-badge area-mini-live">
-                    {latestRain?.simulated ? "Sim" : latestRain ? "Live" : "—"}
-                  </span>
+                  <span className={`area-mini-badge ${rainBadge}`}>{rainLabel}</span>
                 </span>
                 <span className="area-mini-kpi">
                   <span className="area-mini-label">AQI</span>
                   <strong>{latestAq ? `${latestAq.value}` : "—"}</strong>
-                  <span className="area-mini-badge area-mini-live">
-                    {latestAq?.simulated ? "Sim" : latestAq ? "Live" : "—"}
-                  </span>
+                  <span className={`area-mini-badge ${aqBadge}`}>{aqLabel}</span>
                 </span>
                 <span className="area-mini-kpi">
                   <span className="area-mini-label">Delay</span>
                   <strong>{latestDelay ? `${latestDelay.value} min` : "—"}</strong>
-                  <span className="area-mini-badge area-mini-sim">Sim</span>
+                  <span className="area-mini-badge area-mini-sim">Simulated</span>
                 </span>
                 {latestReport && (
                   <span className="area-mini-kpi">
                     <span className="area-mini-label">Reports</span>
                     <strong>{latestReport.value}</strong>
-                    <span className="area-mini-badge area-mini-sim">Sim</span>
+                    <span className="area-mini-badge area-mini-sim">Simulated</span>
                   </span>
                 )}
               </div>
             </div>
             <div className="trend-charts-grid">
               <ObservationChart
-                title={`${area} · Rainfall`}
+                title={`${areaName} · Rainfall`}
                 unit="mm"
                 color={colors.rain}
                 at={data.updatedAt}
                 events={rainEvents}
               />
               <ObservationChart
-                title={`${area} · Air quality`}
+                title={`${areaName} · Air quality`}
                 unit="US AQI"
                 color={colors.aqi}
                 at={data.updatedAt}
@@ -334,4 +350,3 @@ export function CivicTelemetryDashboard({
     </section>
   );
 }
-

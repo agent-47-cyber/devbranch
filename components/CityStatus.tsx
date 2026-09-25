@@ -4,7 +4,7 @@ import { CityLandmark } from "@/components/CityLandmark";
 import { timeLabel } from "@/lib/display";
 import type { CityStatusResponse } from "@/types/city";
 
-export function CityStatus({ data }: { data: CityStatusResponse }) {
+export function CityStatus({ data, area = "Malviya Nagar" }: { data: CityStatusResponse; area?: string }) {
   const { mode, status, analysis, current, possibleLinks } = data;
   const link = possibleLinks[0];
   const available = data.sources.filter(
@@ -29,7 +29,8 @@ export function CityStatus({ data }: { data: CityStatusResponse }) {
           {mode === "live" ? "The Jaipur observatory" : "The Jaipur replay"}
         </p>
         <span>
-          26.8477° N &nbsp; 75.8113° E <b> / </b> INDIA
+          {current.weather?.latitude?.toFixed(4) ?? "26.8477"}° N
+          &nbsp; {current.weather?.longitude?.toFixed(4) ?? "75.8113"}° E <b> / </b> INDIA
         </span>
       </div>
       <div className="observatory-layout">
@@ -108,7 +109,7 @@ export function CityStatus({ data }: { data: CityStatusResponse }) {
           <div className="observatory-caption">
             <span className="source-dot" />
             {mode === "live"
-              ? "Latest model readings · Malviya Nagar"
+              ? `Latest model readings · ${area}`
               : "Illustration · simulated scenario"}
           </div>
         </div>

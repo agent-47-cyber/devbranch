@@ -290,6 +290,30 @@
   color: #64748b;
 }
 
+.area-mini-na {
+  background: #f8f8f8;
+  color: #94a3b8;
+}
+
+/* Selected area highlight */
+.area-selected .area-telemetry-header {
+  border-left: 4px solid #2455cf;
+  background: #f0f4ff;
+}
+
+.area-selected-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #2455cf;
+  color: #ffffff;
+  margin-left: 6px;
+}
+
 .area-telemetry-block .trend-charts-grid {
   border-radius: 0 0 12px 12px;
   overflow: hidden;

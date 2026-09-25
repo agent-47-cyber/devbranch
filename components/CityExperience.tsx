@@ -207,7 +207,7 @@ export function CityExperience() {
           />
         ) : (
           <>
-            <CityStatus data={data} />
+            <CityStatus data={data} area={area} />
             <NarrativeTicker data={data} />
             {mode === "replay" && (
               <ReplayControls
@@ -246,14 +246,15 @@ export function CityExperience() {
                 </div>
               </div>
             )}
-            <CivicTelemetryDashboard data={data} />
+            <CivicTelemetryDashboard data={data} area={mode === "live" ? area : undefined} />
             <ActiveIncidents data={data} />
             <CurrentSituation
               current={data.current}
               mode={mode}
               at={data.updatedAt}
+              area={mode === "live" ? area : data.status.area ?? "Malviya Nagar"}
             />
-            <WhatsHappening data={data} />
+            <WhatsHappening data={data} area={mode === "live" ? area : undefined} />
 
             <DataSources
               sources={data.sources}

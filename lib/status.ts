@@ -1,5 +1,5 @@
 import { fetchAirQualityEvents } from "@/lib/airQuality";
-import { getJaipurArea } from "@/lib/areas";
+import { getJaipurArea, JAIPUR_AREAS } from "@/lib/areas";
 import { createCityStatus } from "@/lib/cityStatus";
 import { findPossibleLinks } from "@/lib/findLinks";
 import {
@@ -78,6 +78,7 @@ export function analyzeStatus(
   responses: SourceResponse[],
   history: CityEvent[],
   at: string,
+  focusArea = "Malviya Nagar",
 ): CityStatusResponse {
   const available = new Set(
     responses
@@ -107,17 +108,16 @@ export function analyzeStatus(
   const readings = responses
     .flatMap((response) => response.events)
     .filter((event) => Date.parse(event.observedAt) <= Date.parse(at));
-  const focus = readings.filter(
-    (event) => event.area === (status.area ?? "Malviya Nagar"),
-  );
+  // Prefer readings from the focus area; fall back to any available reading.
+  const areaReadings = readings.filter((event) => event.area === focusArea);
   const current: CurrentSituation = {
     weather:
-      latest(focus, "weather", "rain") ?? latest(readings, "weather", "rain"),
+      latest(areaReadings, "weather", "rain") ?? latest(readings, "weather", "rain"),
     airQuality:
-      latest(focus, "air_quality", "aqi") ??
+      latest(areaReadings, "air_quality", "aqi") ??
       latest(readings, "air_quality", "aqi"),
-    transport: latest(focus, "transport"),
-    reports: latest(focus, "local_report"),
+    transport: latest(areaReadings, "transport") ?? latest(readings, "transport"),
+    reports: latest(areaReadings, "local_report") ?? latest(readings, "local_report"),
   };
   const titles: Record<string, string> = {
     rain: "Rain increased",
@@ -268,8 +268,8 @@ async function collect(
 export async function getLiveStatus(
   areaName = "Malviya Nagar",
 ): Promise<CityStatusResponse> {
-  // Fetch weather + AQ for the 3 primary areas simultaneously.
-  const liveAreas = ["Malviya Nagar", "Mansarovar", "Vaishali Nagar"] as const;
+  // Fetch weather + AQ for ALL 5 areas simultaneously.
+  const liveAreas = JAIPUR_AREAS.map((a) => a.name);
 
   const [weatherResults, aqResults] = await Promise.all([
     Promise.allSettled(
@@ -329,7 +329,7 @@ export async function getLiveStatus(
       );
     if (stored[1].status === "fulfilled") storedStatuses = stored[1].value;
   }
-  const result = analyzeStatus("live", responses, history, at);
+  const result = analyzeStatus("live", responses, history, at, areaName);
   result.sources = result.sources.map((source) => ({
     ...source,
     lastSuccess:

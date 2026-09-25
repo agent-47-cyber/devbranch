@@ -14,7 +14,7 @@ const CityMap = dynamic(
     loading: () => <div className="map-loading">Opening Jaipur’s map…</div>,
   },
 );
-export function WhatsHappening({ data }: { data: CityStatusResponse }) {
+export function WhatsHappening({ data, area }: { data: CityStatusResponse; area?: string }) {
   const root = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const link = data.possibleLinks[0];
@@ -28,7 +28,16 @@ export function WhatsHappening({ data }: { data: CityStatusResponse }) {
             ["weather", "local_report", "transport"].indexOf(b.source),
         )
     : [];
-  const storyEvents = linked.length
+  // If a specific area is selected, show that area's map events; otherwise fall back to linked events.
+  const areaEvents = area
+    ? data.mapEvents
+        .filter((e) => e.area === area && e.value > 0)
+        .sort((a, b) => Date.parse(b.observedAt) - Date.parse(a.observedAt))
+        .slice(0, 3)
+    : [];
+  const storyEvents = areaEvents.length
+    ? areaEvents
+    : linked.length
     ? linked
     : [
         data.current.weather,
@@ -78,7 +87,7 @@ export function WhatsHappening({ data }: { data: CityStatusResponse }) {
           </h2>
         </div>
         <p>
-          {link ? link.area : "Jaipur"}
+          {area ?? (link ? link.area : "Jaipur")}
           <br />
           The latest available observations
         </p>

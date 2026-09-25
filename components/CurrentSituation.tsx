@@ -5,10 +5,12 @@ export function CurrentSituation({
   current,
   mode,
   at,
+  area = "Jaipur",
 }: {
   current: CurrentSituationData;
   mode: "live" | "replay";
   at: string;
+  area?: string;
 }) {
   const panels = [
     { label: "Weather", event: current.weather, source: "weather" },
@@ -35,6 +37,7 @@ export function CurrentSituation({
           Actual values. Original timestamps.
           <br />
           Clearly labelled sources.
+          {mode === "live" && <><br /><strong style={{ color: "#0f172a" }}>{area}</strong></>}
         </p>
       </div>
       <div className="signal-mosaic">
