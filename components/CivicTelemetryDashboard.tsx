@@ -3,37 +3,69 @@ import type { CityEvent, CityStatusResponse } from "@/types/city";
 import { timeLabel } from "@/lib/display";
 import { isCurrentMapEvent } from "@/lib/mapView";
 
+function formatDuration(ms: number): string {
+  const totalMins = Math.round(ms / 60_000);
+  if (totalMins < 60) return `${totalMins}m`;
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
 function ObservationChart({
   events,
   title,
   unit,
   color,
+  at,
 }: {
   events: CityEvent[];
   title: string;
   unit: string;
   color: string;
+  at: string;
 }) {
   const points = [
     ...new Map(events.map((event) => [event.observedAt, event])).values(),
   ].sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt));
-  const first = points[0];
+
   const last = points.at(-1);
+  const first = points[0];
+
+  // Compute actual observed range from data, not a fixed 3h window
+  const nowMs = Date.parse(at);
+  const firstMs = first ? Date.parse(first.observedAt) : nowMs;
+  const lastMs = last ? Date.parse(last.observedAt) : nowMs;
+  const dataSpanMs = lastMs - firstMs;
+
+  // Add 10% padding on each side, minimum 10 min total window
+  const padding = Math.max(dataSpanMs * 0.1, 5 * 60_000);
+  const windowStart = firstMs - padding;
+  const windowEnd = Math.max(lastMs + padding, windowStart + 10 * 60_000);
+  const totalWindow = windowEnd - windowStart;
+
   const maximum = Math.max(1, ...points.map((event) => event.value)) * 1.15;
-  const duration =
-    first && last
-      ? Date.parse(last.observedAt) - Date.parse(first.observedAt)
-      : 0;
-  const coords = points.map((event) => ({
-    event,
-    x: duration
-      ? 44 +
-        ((Date.parse(event.observedAt) - Date.parse(first.observedAt)) /
-          duration) *
-          390
-      : 240,
-    y: 160 - (event.value / maximum) * 130,
-  }));
+  const coords = points.map((event) => {
+    const t = Date.parse(event.observedAt);
+    const progress = Math.max(0, Math.min(1, (t - windowStart) / totalWindow));
+    return {
+      event,
+      x: 44 + progress * 390,
+      y: 160 - (event.value / maximum) * 130,
+    };
+  });
+
+  // Compute trend direction for display
+  let trend = "";
+  if (points.length >= 2) {
+    const diff = last!.value - first!.value;
+    const pct = first!.value !== 0 ? Math.abs((diff / first!.value) * 100) : 0;
+    if (Math.abs(diff) < 0.01) trend = "Steady";
+    else if (diff > 0) trend = `↑ +${pct.toFixed(0)}%`;
+    else trend = `↓ −${pct.toFixed(0)}%`;
+  }
+
+  const spanLabel = dataSpanMs > 0 ? formatDuration(dataSpanMs) : "";
+
   return (
     <article className="trend-card">
       <div className="trend-card-top">
@@ -47,15 +79,20 @@ function ObservationChart({
         </span>
       </div>
       <p className="trend-card-desc">
-        {last?.area ?? "Malviya Nagar"} · available observations from the last 3
-        hours. No generated history.
+        {last?.area ?? "Malviya Nagar"}
+        {points.length >= 2
+          ? ` · ${spanLabel} observed (${timeLabel(first!.observedAt)} – ${timeLabel(last!.observedAt)} IST)`
+          : points.length === 1
+            ? ` · Single reading at ${timeLabel(last!.observedAt)} IST`
+            : " · Awaiting observations"}
+        {trend ? ` · ${trend}` : ""}
       </p>
       {points.length ? (
         <svg
           viewBox="0 0 480 200"
           className="observation-chart"
           role="img"
-          aria-label={`${title}: ${points.length} observations, latest ${last!.value} ${unit}`}
+          aria-label={`${title}: ${points.length} observations, latest ${last!.value} ${unit} at ${timeLabel(last!.observedAt)} IST`}
         >
           {[0, 0.5, 1].map((ratio) => (
             <g key={ratio}>
@@ -92,14 +129,15 @@ function ObservationChart({
               </title>
             </circle>
           ))}
-          <text x="44" y="187" fontSize="11" fill="#64748b">
-            {timeLabel(first.observedAt)} IST
+          <text x="44" y="187" fontSize="10" fill="#64748b">
+            {timeLabel(new Date(windowStart).toISOString())} IST
           </text>
-          {duration > 0 && (
-            <text x="434" y="187" textAnchor="end" fontSize="11" fill="#64748b">
-              {timeLabel(last!.observedAt)} IST
-            </text>
-          )}
+          <text x="239" y="187" textAnchor="middle" fontSize="10" fill="#64748b">
+            {timeLabel(new Date(windowStart + totalWindow / 2).toISOString())} IST
+          </text>
+          <text x="434" y="187" textAnchor="end" fontSize="10" fill="#64748b">
+            {timeLabel(new Date(windowEnd).toISOString())} IST
+          </text>
         </svg>
       ) : (
         <p className="observation-empty">
@@ -108,10 +146,15 @@ function ObservationChart({
       )}
       <div className="trend-card-footer">
         <span>
-          {points.length} recorded points
+          {points.length} recorded point{points.length === 1 ? "" : "s"}
           {points.length === 1 ? " · trend needs more history" : ""}
         </span>
-        <span>Latest: {last ? `${last.value} ${unit}` : "—"}</span>
+        <span>
+          Latest:{" "}
+          {last
+            ? `${last.value} ${unit} (${timeLabel(last.observedAt)} IST)`
+            : "—"}
+        </span>
       </div>
       {points.length > 0 && (
         <details className="chart-readings">
@@ -143,11 +186,17 @@ export function CivicTelemetryDashboard({
   const cards = [
     {
       title: "City change score",
-      value: data.analysis.scoreAvailable ? data.status.score : "—",
+      value: data.analysis.scoreAvailable
+        ? data.status.score
+        : data.status.score > 0
+          ? data.status.score
+          : "—",
       unit: "/ 100",
       note: data.analysis.scoreAvailable
         ? `${data.status.label} · internal prototype score`
-        : "Insufficient comparable feeds",
+        : data.status.score > 0
+          ? `${data.analysis.activeSources} of 4 feeds · partial estimate`
+          : `${data.analysis.activeSources} of 4 feeds active · awaiting data`,
     },
     {
       title: "Air quality",
@@ -191,6 +240,7 @@ export function CivicTelemetryDashboard({
           title="Rainfall over time"
           unit="mm"
           color="#2455cf"
+          at={data.updatedAt}
           events={history.filter(
             (e) =>
               e.source === "weather" &&
@@ -203,6 +253,7 @@ export function CivicTelemetryDashboard({
           title="Air quality over time"
           unit="US AQI"
           color="#b37721"
+          at={data.updatedAt}
           events={history.filter(
             (e) =>
               e.source === "air_quality" &&
