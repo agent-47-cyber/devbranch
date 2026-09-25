@@ -212,7 +212,7 @@ export function CivicTelemetryDashboard({
       : "No reading available";
   const topCards = [
     {
-      title: "City change score",
+      title: "City health score",
       value: data.analysis.scoreAvailable
         ? data.status.score
         : data.status.score > 0

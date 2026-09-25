@@ -193,7 +193,7 @@ export function analyzeStatus(
   ).size;
   const scoreAvailable = activeSources >= 3 && baselineSources >= 3;
   const explanation = scoreAvailable
-    ? "An internal change score, not an official city health rating. Higher means fewer unusual changes in the available feeds."
+    ? "An internal city health score, not an official emergency rating. Higher means fewer unusual disruptions in the available feeds."
     : `Only ${activeSources} of 4 feeds have observations inside the 30-minute window; ${baselineSources} have comparison history. A city score is withheld until at least 3 feeds have both.`;
   return {
     mode,
