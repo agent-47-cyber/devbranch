@@ -23,11 +23,26 @@ export function getLocalReportRecords(): LocalReportRecord[] {
   return reportData as LocalReportRecord[];
 }
 
+/**
+ * Shift simulated timestamps so the latest record is 5 minutes before now.
+ */
+function shiftToNow(records: LocalReportRecord[]): LocalReportRecord[] {
+  if (records.length === 0) return records;
+  const timestamps = records.map((r) => Date.parse(r.observedAt));
+  const latest = Math.max(...timestamps);
+  const anchor = Date.now() - 5 * 60_000;
+  const offset = anchor - latest;
+  return records.map((r) => ({
+    ...r,
+    observedAt: new Date(Date.parse(r.observedAt) + offset).toISOString(),
+  }));
+}
+
 export function normalizeLocalReportRecords(
   records: LocalReportRecord[],
   receivedAt?: string,
 ): CityEvent[] {
-  return records.map((record) =>
+  return shiftToNow(records).map((record) =>
     createCityEvent(
       {
         id: record.id,

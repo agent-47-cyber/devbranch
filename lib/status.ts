@@ -268,21 +268,49 @@ async function collect(
 export async function getLiveStatus(
   areaName = "Malviya Nagar",
 ): Promise<CityStatusResponse> {
-  const areaObj = getJaipurArea(areaName);
-  const location = {
-    area: areaObj.name,
-    latitude: areaObj.latitude,
-    longitude: areaObj.longitude,
-  };
-  const responses = await Promise.all([
-    collect("weather", "live", () => fetchWeatherEvents(location)),
-    collect("air_quality", "live", () => fetchAirQualityEvents(location)),
-    collect("transport", "simulated", async () =>
+  // Fetch weather + AQ for the 3 primary areas simultaneously.
+  const liveAreas = ["Malviya Nagar", "Mansarovar", "Vaishali Nagar"] as const;
+
+  const [weatherResults, aqResults] = await Promise.all([
+    Promise.allSettled(
+      liveAreas.map((name) => {
+        const a = getJaipurArea(name);
+        return fetchWeatherEvents({ area: a.name, latitude: a.latitude, longitude: a.longitude });
+      }),
+    ),
+    Promise.allSettled(
+      liveAreas.map((name) => {
+        const a = getJaipurArea(name);
+        return fetchAirQualityEvents({ area: a.name, latitude: a.latitude, longitude: a.longitude });
+      }),
+    ),
+  ]);
+
+  const allWeatherEvents = weatherResults.flatMap((r) =>
+    r.status === "fulfilled" ? r.value : [],
+  );
+  const allAqEvents = aqResults.flatMap((r) =>
+    r.status === "fulfilled" ? r.value : [],
+  );
+  const weatherOk = allWeatherEvents.length > 0;
+  const aqOk = allAqEvents.length > 0;
+
+  const responses: SourceResponse[] = [
+    createSourceResponse("weather", weatherOk ? "live" : "unavailable", allWeatherEvents,
+      weatherOk ? undefined : "Temporarily unavailable. CityPulse is continuing with the other feeds."),
+    createSourceResponse("air_quality", aqOk ? "live" : "unavailable", allAqEvents,
+      aqOk ? undefined : "Temporarily unavailable. CityPulse is continuing with the other feeds."),
+    await collect("transport", "simulated", async () =>
       normalizeTransportRecords(getTransportRecords()),
     ),
-    collect("local_report", "simulated", async () =>
+    await collect("local_report", "simulated", async () =>
       normalizeLocalReportRecords(getLocalReportRecords()),
     ),
+  ];
+  // Persist weather + AQ responses
+  await Promise.allSettled([
+    persistSourceResponse(responses[0]),
+    persistSourceResponse(responses[1]),
   ]);
   const at = new Date().toISOString();
   let history: CityEvent[] = [];

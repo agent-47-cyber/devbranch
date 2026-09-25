@@ -202,6 +202,123 @@
   }
 }
 
+/* ── Per-area Telemetry Block ── */
+.area-telemetry-block {
+  margin-bottom: 8px;
+}
+
+.area-telemetry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px 12px 0 0;
+  border-bottom: none;
+}
+
+.area-telemetry-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.area-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.area-mini-kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.area-mini-kpi {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 5px 12px;
+}
+
+.area-mini-label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.area-mini-kpi strong {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.area-mini-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.area-mini-live {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.area-mini-sim {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.area-telemetry-block .trend-charts-grid {
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+  gap: 0;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.area-telemetry-block .trend-card {
+  border-radius: 0;
+  border: none;
+  border-right: 1px solid #e2e8f0;
+  box-shadow: none;
+}
+
+.area-telemetry-block .trend-card:last-child {
+  border-right: none;
+}
+
+@media (max-width: 900px) {
+  .area-telemetry-block .trend-card {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .area-telemetry-block .trend-card:last-child {
+    border-bottom: none;
+  }
+}
+
 .trend-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;

@@ -172,18 +172,39 @@ function ObservationChart({
   );
 }
 
+const DISPLAY_AREAS = ["Malviya Nagar", "Mansarovar", "Vaishali Nagar"] as const;
+
+const AREA_COLORS: Record<string, { rain: string; aqi: string }> = {
+  "Malviya Nagar": { rain: "#2455cf", aqi: "#b37721" },
+  "Mansarovar":    { rain: "#0891b2", aqi: "#7c3aed" },
+  "Vaishali Nagar":{ rain: "#059669", aqi: "#dc2626" },
+};
+
 export function CivicTelemetryDashboard({
   data,
 }: {
   data: CityStatusResponse;
 }) {
+  const history = data.observationHistory ?? [];
+  const all = [...history, ...data.mapEvents];
+
+  // Latest reading per area per type from any event set
+  function latestForArea(area: string, source: string, type: string): CityEvent | null {
+    return (
+      all
+        .filter((e) => e.area === area && e.source === source && e.type === type)
+        .sort((a, b) => Date.parse(b.observedAt) - Date.parse(a.observedAt))[0] ?? null
+    );
+  }
+
+  // Top summary KPI cards
   const aq = data.current.airQuality;
   const delay = data.current.transport;
   const sourceNote = (event: CityEvent | null) =>
     event
       ? `${event.simulated ? "Simulated" : "Public feed"} · ${isCurrentMapEvent(event, data.updatedAt) ? "Current" : "Older"} · ${timeLabel(event.observedAt)} IST`
       : "No reading available";
-  const cards = [
+  const topCards = [
     {
       title: "City change score",
       value: data.analysis.scoreAvailable
@@ -217,14 +238,15 @@ export function CivicTelemetryDashboard({
       note: "Available feeds only · not official alerts",
     },
   ];
-  const history = data.observationHistory ?? [];
+
   return (
     <section
       className="telemetry-cockpit-shell"
       aria-label="City readings and observed trends"
     >
+      {/* Top summary row */}
       <div className="kpi-grid">
-        {cards.map((card) => (
+        {topCards.map((card) => (
           <article key={card.title} className="kpi-card">
             <h3 className="kpi-card-title">{card.title}</h3>
             <div className="kpi-card-value-wrap">
@@ -235,34 +257,81 @@ export function CivicTelemetryDashboard({
           </article>
         ))}
       </div>
-      <div className="trend-charts-grid">
-        <ObservationChart
-          title="Rainfall over time"
-          unit="mm"
-          color="#2455cf"
-          at={data.updatedAt}
-          events={history.filter(
-            (e) =>
-              e.source === "weather" &&
-              e.type === "rain" &&
-              e.unit === "mm" &&
-              e.area === data.current.weather?.area,
-          )}
-        />
-        <ObservationChart
-          title="Air quality over time"
-          unit="US AQI"
-          color="#b37721"
-          at={data.updatedAt}
-          events={history.filter(
-            (e) =>
-              e.source === "air_quality" &&
-              e.type === "aqi" &&
-              e.unit === "US AQI" &&
-              e.area === aq?.area,
-          )}
-        />
-      </div>
+
+      {/* Per-area observation sections */}
+      {DISPLAY_AREAS.map((area) => {
+        const colors = AREA_COLORS[area]!;
+        const rainEvents = history.filter(
+          (e) => e.source === "weather" && e.type === "rain" && e.area === area,
+        );
+        const aqEvents = history.filter(
+          (e) => e.source === "air_quality" && e.type === "aqi" && e.area === area,
+        );
+        const latestRain = latestForArea(area, "weather", "rain");
+        const latestAq = latestForArea(area, "air_quality", "aqi");
+        const latestDelay = latestForArea(area, "transport", "delay");
+        const latestReport = latestForArea(area, "local_report", "waterlogging")
+          ?? latestForArea(area, "local_report", "road blockage")
+          ?? latestForArea(area, "local_report", "traffic signal problem")
+          ?? latestForArea(area, "local_report", "power outage")
+          ?? latestForArea(area, "local_report", "fallen tree");
+
+        return (
+          <div key={area} className="area-telemetry-block">
+            <div className="area-telemetry-header">
+              <div className="area-telemetry-name">
+                <span className="area-dot" style={{ background: colors.rain }} />
+                {area}
+              </div>
+              <div className="area-mini-kpis">
+                <span className="area-mini-kpi">
+                  <span className="area-mini-label">Rain</span>
+                  <strong>{latestRain ? `${latestRain.value} mm` : "—"}</strong>
+                  <span className="area-mini-badge area-mini-live">
+                    {latestRain?.simulated ? "Sim" : latestRain ? "Live" : "—"}
+                  </span>
+                </span>
+                <span className="area-mini-kpi">
+                  <span className="area-mini-label">AQI</span>
+                  <strong>{latestAq ? `${latestAq.value}` : "—"}</strong>
+                  <span className="area-mini-badge area-mini-live">
+                    {latestAq?.simulated ? "Sim" : latestAq ? "Live" : "—"}
+                  </span>
+                </span>
+                <span className="area-mini-kpi">
+                  <span className="area-mini-label">Delay</span>
+                  <strong>{latestDelay ? `${latestDelay.value} min` : "—"}</strong>
+                  <span className="area-mini-badge area-mini-sim">Sim</span>
+                </span>
+                {latestReport && (
+                  <span className="area-mini-kpi">
+                    <span className="area-mini-label">Reports</span>
+                    <strong>{latestReport.value}</strong>
+                    <span className="area-mini-badge area-mini-sim">Sim</span>
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="trend-charts-grid">
+              <ObservationChart
+                title={`${area} · Rainfall`}
+                unit="mm"
+                color={colors.rain}
+                at={data.updatedAt}
+                events={rainEvents}
+              />
+              <ObservationChart
+                title={`${area} · Air quality`}
+                unit="US AQI"
+                color={colors.aqi}
+                at={data.updatedAt}
+                events={aqEvents}
+              />
+            </div>
+          </div>
+        );
+      })}
     </section>
   );
 }
+
