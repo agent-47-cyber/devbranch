@@ -7,7 +7,7 @@ export async function GET() {
     const response = createSourceResponse(
       "transport",
       "simulated",
-      normalizeTransportRecords(getTransportRecords()),
+      normalizeTransportRecords(getTransportRecords(), undefined, true),
     );
 
     await persistSourceResponse(response);

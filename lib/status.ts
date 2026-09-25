@@ -301,10 +301,10 @@ export async function getLiveStatus(
     createSourceResponse("air_quality", aqOk ? "live" : "unavailable", allAqEvents,
       aqOk ? undefined : "Temporarily unavailable. CityPulse is continuing with the other feeds."),
     await collect("transport", "simulated", async () =>
-      normalizeTransportRecords(getTransportRecords()),
+      normalizeTransportRecords(getTransportRecords(), undefined, true),
     ),
     await collect("local_report", "simulated", async () =>
-      normalizeLocalReportRecords(getLocalReportRecords()),
+      normalizeLocalReportRecords(getLocalReportRecords(), undefined, true),
     ),
   ];
   // Persist weather + AQ responses

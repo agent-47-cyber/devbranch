@@ -7,7 +7,7 @@ export async function GET() {
     const response = createSourceResponse(
       "local_report",
       "simulated",
-      normalizeLocalReportRecords(getLocalReportRecords()),
+      normalizeLocalReportRecords(getLocalReportRecords(), undefined, true),
     );
 
     await persistSourceResponse(response);

@@ -35,8 +35,10 @@ function shiftToNow(records: TransportRecord[]): TransportRecord[] {
 export function normalizeTransportRecords(
   records: TransportRecord[],
   receivedAt?: string,
+  shouldShiftToNow = false,
 ): CityEvent[] {
-  return shiftToNow(records).map((record) =>
+  const prepared = shouldShiftToNow ? shiftToNow(records) : records;
+  return prepared.map((record) =>
     createCityEvent(
       {
         id: record.id,
