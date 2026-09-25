@@ -535,6 +535,52 @@
   flex-shrink: 0;
 }
 
+/* Table Footer */
+.incidents-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-top: 1px solid #e2e8f0;
+  margin-top: -1px;
+}
+
+.incidents-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Empty State */
+.incidents-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.incidents-empty-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #334155;
+  margin: 16px 0 6px;
+}
+
+.incidents-empty-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #94a3b8;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
 /* ── White Colour Box Map Popup (Image 5 Inspector) ── */
 .map-frame {
   min-height: 520px !important;
