@@ -1,7 +1,6 @@
 "use client";
 import type { CityEvent, CityStatusResponse } from "@/types/city";
 import { timeLabel } from "@/lib/display";
-import { isCurrentMapEvent } from "@/lib/mapView";
 
 function formatDuration(ms: number): string {
   const totalMins = Math.round(ms / 60_000);
@@ -57,6 +56,7 @@ function ObservationChart({
     const diff = last!.value - first!.value;
     const pct = first!.value !== 0 ? Math.abs((diff / first!.value) * 100) : 0;
     if (Math.abs(diff) < 0.01) trend = "Steady";
+    else if (first!.value === 0) trend = `↑ +${diff.toFixed(1)} ${unit}`;
     else if (diff > 0) trend = `↑ +${pct.toFixed(0)}%`;
     else trend = `↓ −${pct.toFixed(0)}%`;
   }
@@ -170,14 +170,6 @@ function ObservationChart({
 }
 
 /* ── Constants ── */
-const DISPLAY_AREAS = [
-  "Malviya Nagar",
-  "Mansarovar",
-  "Vaishali Nagar",
-  "Jagatpura",
-  "C-Scheme",
-] as const;
-
 const AREA_COLORS: Record<string, { rain: string; aqi: string }> = {
   "Malviya Nagar":  { rain: "#2455cf", aqi: "#b37721" },
   "Mansarovar":     { rain: "#0891b2", aqi: "#7c3aed" },
@@ -204,70 +196,20 @@ export function CivicTelemetryDashboard({
     );
   }
 
-  const aq = data.current.airQuality;
-  const delay = data.current.transport;
-  const sourceNote = (event: CityEvent | null) =>
-    event
-      ? `${event.simulated ? "Simulated" : "Public feed"} · ${isCurrentMapEvent(event, data.updatedAt) ? "Current" : "Older"} · ${timeLabel(event.observedAt)} IST`
-      : "No reading available";
-  const topCards = [
-    {
-      title: "City health score",
-      value: data.analysis.scoreAvailable
-        ? data.status.score
-        : data.status.score > 0
-          ? data.status.score
-          : "—",
-      unit: "/ 100",
-      note: data.analysis.scoreAvailable
-        ? `${data.status.label} · internal prototype score`
-        : data.status.score > 0
-          ? `${data.analysis.activeSources} of 4 feeds · partial estimate`
-          : `${data.analysis.activeSources} of 4 feeds active · awaiting data`,
-    },
-    {
-      title: "Air quality",
-      value: aq?.value ?? "—",
-      unit: aq?.unit ?? "US AQI",
-      note: sourceNote(aq),
-    },
-    {
-      title: "Transport delay",
-      value: delay?.value ?? "—",
-      unit: delay?.unit ?? "minutes",
-      note: sourceNote(delay),
-    },
-    {
-      title: "Threshold flags",
-      value: data.alerts.length,
-      unit: "in 30 min",
-      note: "Available feeds only · not official alerts",
-    },
-  ];
-
-  const sortedAreas = [...DISPLAY_AREAS].sort((a, b) => {
-    if (area && a === area) return -1;
-    if (area && b === area) return 1;
-    return 0;
-  });
+  // Keep the selected neighbourhood in focus instead of repeating ten charts.
+  const sortedAreas = [area ?? "Malviya Nagar"];
 
   return (
     <section
       className="telemetry-cockpit-shell"
       aria-label="City readings and observed trends"
     >
-      {/* Top summary KPI row */}
-      <div className="kpi-grid">
-        {topCards.map((card) => (
-          <article key={card.title} className="kpi-card">
-            <h3 className="kpi-card-title">{card.title}</h3>
-            <div className="kpi-card-value-wrap">
-              <strong className="kpi-card-value">{card.value}</strong>
-              <span className="kpi-card-unit">{card.unit}</span>
-            </div>
-            <p className="kpi-card-footer">{card.note}</p>
-          </article>
-        ))}
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">03 / The longer view</p>
+          <h2>Small changes.<br /><span>A clearer pattern.</span></h2>
+        </div>
+        <p>Up to three hours of available history.<br />No invented points between readings.</p>
       </div>
 
       {/* Per-area observation sections — selected area floats to top */}

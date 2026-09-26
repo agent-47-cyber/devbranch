@@ -34,7 +34,7 @@ export function CurrentSituation({
           </h2>
         </div>
         <p>
-          Actual values. Original timestamps.
+            Source values. Observation times.
           <br />
           Clearly labelled sources.
           {mode === "live" && <><br /><strong style={{ color: "#0f172a" }}>{area}</strong></>}

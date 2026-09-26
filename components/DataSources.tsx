@@ -65,9 +65,10 @@ export function DataSources({
       </p>
       <p className="source-note">
         Live means retrieved from a public provider, not a street-level sensor.
-        Weather and air quality are model-based estimates for Malviya Nagar. US
+        Weather and air quality are model-based estimates for the five monitored Jaipur areas. US
         AQI and India AQI use different scales. Polling every minute does not
         guarantee a new provider reading.
+        {mode === "live" && " Simulated transport and reports reuse a fixed scenario, with its timeline shifted to the present. Their timestamps are scenario times, not real incident times."}
       </p>
       <p className="source-attribution">
         Weather: <a href="https://open-meteo.com/">Open-Meteo</a> · Air quality:{" "}

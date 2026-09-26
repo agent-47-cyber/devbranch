@@ -108,16 +108,15 @@ export function analyzeStatus(
   const readings = responses
     .flatMap((response) => response.events)
     .filter((event) => Date.parse(event.observedAt) <= Date.parse(at));
-  // Prefer readings from the focus area; fall back to any available reading.
+  // Never substitute a different neighbourhood when a selected area's feed fails.
   const areaReadings = readings.filter((event) => event.area === focusArea);
   const current: CurrentSituation = {
     weather:
-      latest(areaReadings, "weather", "rain") ?? latest(readings, "weather", "rain"),
+      latest(areaReadings, "weather", "rain"),
     airQuality:
-      latest(areaReadings, "air_quality", "aqi") ??
-      latest(readings, "air_quality", "aqi"),
-    transport: latest(areaReadings, "transport") ?? latest(readings, "transport"),
-    reports: latest(areaReadings, "local_report") ?? latest(readings, "local_report"),
+      latest(areaReadings, "air_quality", "aqi"),
+    transport: latest(areaReadings, "transport"),
+    reports: latest(areaReadings, "local_report"),
   };
   const titles: Record<string, string> = {
     rain: "Rain increased",

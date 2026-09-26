@@ -4,24 +4,6 @@ import type { CityEvent, CityStatusResponse } from "@/types/city";
 import { isCurrentMapEvent, incidentTitle } from "@/lib/mapView";
 import { timeLabel } from "@/lib/display";
 
-/* ── Severity logic ── */
-function severity(event: CityEvent): "Low" | "Medium" | "High" {
-  const thresholds: Record<string, [number, number]> = {
-    rain: [3, 8],
-    aqi: [100, 150],
-    delay: [10, 20],
-    waterlogging: [3, 6],
-    "road blockage": [2, 5],
-    "traffic signal problem": [2, 4],
-    "power outage": [2, 5],
-    "fallen tree": [2, 4],
-  };
-  const [med, high] = thresholds[event.type] ?? [5, 10];
-  if (event.value >= high) return "High";
-  if (event.value >= med) return "Medium";
-  return "Low";
-}
-
 /* ── Status label ── */
 function statusLabel(
   event: CityEvent,
@@ -89,15 +71,6 @@ function TypeIcon({ type }: { type: string }) {
   );
 }
 
-/* ── Ref ID generator ── */
-function refId(event: CityEvent): string {
-  // Deterministic from event id
-  const n = event.id
-    .split("")
-    .reduce((sum, c) => sum + c.charCodeAt(0), 0);
-  return `INC-${1000 + (n % 999)}`;
-}
-
 export function ActiveIncidents({ data }: { data: CityStatusResponse }) {
   const [filter, setFilter] = useState("All");
   const rows = data.mapEvents.filter(
@@ -120,13 +93,13 @@ export function ActiveIncidents({ data }: { data: CityStatusResponse }) {
           <div>
             <div className="incidents-subhead">
               <span className="incidents-pulse-dot" />
-              Civic verification stream
+              Across the city / recent signals
             </div>
             <h2 id="incidents-title" className="incidents-main-title">
-              Active Incidents
+              Reports & readings.
             </h2>
             <p className="incidents-subtitle">
-              Flagged readings and field reports within 30 minutes of{" "}
+              Available readings within 30 minutes of{" "}
               {timeLabel(data.updatedAt)} IST. No dispatch status is inferred.
             </p>
           </div>
@@ -153,16 +126,15 @@ export function ActiveIncidents({ data }: { data: CityStatusResponse }) {
               <table className="incidents-table">
                 <thead>
                   <tr>
-                    <th>Incident type &amp; ID</th>
+                    <th>Signal &amp; source</th>
                     <th>Zone location</th>
-                    <th>Severity</th>
+                    <th>Reading</th>
                     <th>Timeline</th>
                     <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {visible.map((event) => {
-                    const sev = severity(event);
                     const isAlert = data.alerts.some(
                       (a) => a.eventId === event.id,
                     );
@@ -177,7 +149,7 @@ export function ActiveIncidents({ data }: { data: CityStatusResponse }) {
                                 {incidentTitle(event)}
                               </div>
                               <div className="incident-ref">
-                                Ref: {refId(event)}
+                                {event.simulated ? "Simulated · demonstration data" : "Public model · Open-Meteo"}
                               </div>
                             </div>
                           </div>
@@ -200,11 +172,7 @@ export function ActiveIncidents({ data }: { data: CityStatusResponse }) {
                           </div>
                         </td>
                         <td>
-                          <span
-                            className={`severity-badge severity-${sev.toLowerCase()}`}
-                          >
-                            {sev}
-                          </span>
+                          <strong className="incident-measurement">{event.value} {event.unit}</strong>
                         </td>
                         <td>
                           <div className="incident-timeline">
@@ -242,8 +210,7 @@ export function ActiveIncidents({ data }: { data: CityStatusResponse }) {
             <div className="incidents-table-footer">
               <span className="incidents-count">
                 Showing {visible.length} of {rows.length}{" "}
-                {visible.some((e) => e.simulated) ? "synthetic" : ""} civic
-                incident report{rows.length === 1 ? "" : "s"}
+                readings · public and simulated sources are labelled separately
               </span>
             </div>
           </>
@@ -262,7 +229,7 @@ export function ActiveIncidents({ data }: { data: CityStatusResponse }) {
               <line x1="9" y1="9" x2="9.01" y2="9" />
               <line x1="15" y1="9" x2="15.01" y2="9" />
             </svg>
-            <p className="incidents-empty-title">No active incidents</p>
+            <p className="incidents-empty-title">No matching readings</p>
             <p className="incidents-empty-desc">
               No current observations match this filter. Missing reports do not
               confirm clear roads.

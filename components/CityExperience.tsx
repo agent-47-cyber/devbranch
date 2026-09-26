@@ -34,6 +34,7 @@ export function CityExperience() {
   const frames = framesByDay[replayDay] ?? [];
   const [live, setLive] = useState<CityStatusResponse | null>(null);
   const [area, setArea] = useState("Malviya Nagar");
+  const [loadedArea, setLoadedArea] = useState("Malviya Nagar");
   const [error, setError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -139,7 +140,10 @@ export function CityExperience() {
             setFramesByDay(Object.fromEntries(next));
         } else {
           const next = await read(`/api/status?mode=live&area=${encodeURIComponent(area)}`);
-          if (!controller.signal.aborted) setLive(next);
+          if (!controller.signal.aborted) {
+            setLive(next);
+            setLoadedArea(area);
+          }
         }
         if (!controller.signal.aborted) setError(null);
       } catch {
@@ -207,7 +211,7 @@ export function CityExperience() {
           />
         ) : (
           <>
-            <CityStatus data={data} area={area} />
+            <CityStatus data={data} area={mode === "live" ? loadedArea : "Malviya Nagar"} />
             <NarrativeTicker data={data} />
             {mode === "replay" && (
               <ReplayControls
@@ -231,13 +235,15 @@ export function CityExperience() {
             <CivicAlerts alerts={data.alerts} mode={mode} />
             {mode === "live" && (
               <div className="area-switcher-bar">
-                <span className="area-switcher-label">Viewing area</span>
+                <span className="area-switcher-label" role="status">
+                  {area !== loadedArea ? `Loading ${area} · showing ${loadedArea}` : "Viewing area"}
+                </span>
                 <div className="area-switcher-pills" role="group" aria-label="Select neighbourhood">
                   {JAIPUR_AREAS.map((a) => (
                     <button
                       key={a.name}
                       className={`area-pill${area === a.name ? " active" : ""}`}
-                      onClick={() => { setArea(a.name); setLive(null); }}
+                      onClick={() => setArea(a.name)}
                       aria-pressed={area === a.name}
                     >
                       {a.name}
@@ -246,15 +252,15 @@ export function CityExperience() {
                 </div>
               </div>
             )}
-            <CivicTelemetryDashboard data={data} area={mode === "live" ? area : undefined} />
-            <ActiveIncidents data={data} />
             <CurrentSituation
               current={data.current}
               mode={mode}
               at={data.updatedAt}
-              area={mode === "live" ? area : data.status.area ?? "Malviya Nagar"}
+              area={mode === "live" ? loadedArea : "Malviya Nagar"}
             />
-            <WhatsHappening data={data} area={mode === "live" ? area : undefined} />
+            <WhatsHappening data={data} area={mode === "live" ? loadedArea : undefined} />
+            <ActiveIncidents data={data} />
+            <CivicTelemetryDashboard data={data} area={mode === "live" ? loadedArea : undefined} />
 
             <DataSources
               sources={data.sources}
@@ -263,12 +269,8 @@ export function CityExperience() {
             />
             <footer className="site-footer">
               <a className="brand" href="#top">
-                CityPulse<span>JAIPUR</span>
+                CityPulse
               </a>
-              <p>Jaipur, understood a little better.</p>
-              <small>
-                A civic data prototype. Association is not proof of cause.
-              </small>
             </footer>
           </>
         )}

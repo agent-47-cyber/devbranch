@@ -16,7 +16,7 @@ export function CityStatus({ data, area = "Malviya Nagar" }: { data: CityStatusR
       ? link
         ? "A city.\nConnected."
         : "Before the\nchange."
-      : "A city.\nIn perspective.";
+      : "Jaipur.\nIn perspective.";
   return (
     <section
       className="pulse-hero"
@@ -37,7 +37,7 @@ export function CityStatus({ data, area = "Malviya Nagar" }: { data: CityStatusR
         <div className="intro-copy">
           <p className="edition-label">
             {mode === "live"
-              ? "PUBLIC DATA. HUMAN PERSPECTIVE."
+              ? `YOUR NEIGHBOURHOOD / ${area.toUpperCase()}`
               : `SIMULATED SCENARIO / ${timeLabel(data.updatedAt)} IST`}
           </p>
           <h1 id="city-status-title">
@@ -47,7 +47,7 @@ export function CityStatus({ data, area = "Malviya Nagar" }: { data: CityStatusR
           </h1>
           <p className="intro-description">
             {mode === "live"
-              ? "Weather, air, movement and local reports. Different signals, brought together to help you see what’s happening—and why it matters."
+              ? `${area}: ${current.weather ? `${current.weather.value} mm rainfall` : "rainfall unavailable"}, ${current.airQuality ? `${current.airQuality.value} US AQI` : "air quality unavailable"}. Latest public model readings, alongside clearly labelled transport and report simulations.`
               : "Follow a rain event as reports and delays emerge. Not today’s conditions: a repeatable demonstration of how possible links are found."}
           </p>
           <div className="hero-state">
@@ -116,7 +116,7 @@ export function CityStatus({ data, area = "Malviya Nagar" }: { data: CityStatusR
       </div>
       <div className="pulse-brief">
         <div className="brief-index">
-          <small>CHANGE INDEX</small>
+          <small>CITYWIDE CHANGE INDEX</small>
           <strong>
             {analysis.scoreAvailable ? (
               <AnimatedNumber value={status.score} />
@@ -141,8 +141,13 @@ export function CityStatus({ data, area = "Malviya Nagar" }: { data: CityStatusR
               ? "Groq-assisted brief · source-grounded facts"
               : mode === "replay"
                 ? "Scenario summary"
-                : "Template summary · AI unavailable or not configured"}
+                : "Brief from available observations"}
           </small>
+          <p className="brief-impact">
+            {mode === "replay" || link
+              ? "Scenario context: follow rain, reports and delays to explore where a resident might need more travel information. This is not a live travel advisory."
+              : "For your day: use the public readings as context and check local conditions before travelling. Simulated reports are not current road reports."}
+          </p>
         </div>
         <details className="score-method">
           <summary>

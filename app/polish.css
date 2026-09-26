@@ -1,4 +1,62 @@
 /* Final responsive layer: content determines height, units retain readable tracking. */
+.observatory-layout { padding-block: 32px; }
+.intro-copy h1 { font-size: clamp(52px, 6.2vw, 90px); text-wrap: balance; }
+.city-observatory { height: 365px; }
+.pulse-brief { background: #fffdf7; border: 1px solid #deded2; border-radius: 18px; padding: 26px; box-shadow: 0 12px 36px #18394706; }
+.brief-summary > .brief-impact { font-size: 12px; line-height: 1.7; color: #526875; border-top: 1px solid var(--line); margin-top: 16px; padding-top: 12px; }
+.brief-index > small, .brief-summary .eyebrow, .brief-provider { font-size: 10px; line-height: 1.6; }
+.brief-index > span, .score-method { font-size: 12px; }
+.hero-state, .edition-label, .provenance-ribbon { font-size: 11px; }
+.intro-description { margin-top: 20px; }
+.section-shell { padding-block: 52px; }
+.section-heading h2 { text-wrap: balance; }
+.signal-panel { border-radius: 16px; box-shadow: 0 8px 28px #18394705; transition: transform .2s ease, box-shadow .2s ease; }
+.signal-panel:hover { transform: translateY(-3px); box-shadow: 0 14px 32px #1839470c; }
+.signal-top { font-size: 14px; }
+.signal-origin, .signal-foot, .signal-name, .signal-location, .provider-link { font-size: 12px; }
+.signal-foot { gap: 12px; flex-wrap: wrap; line-height: 1.7; }
+.area-switcher-bar { border-radius: 16px; background: #eaece3; margin-block: 28px 0; padding: 18px 22px; }
+.area-pill { min-height: 44px; }
+.story-layout { grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr); gap: 36px; align-items: start; }
+.story-scene { min-height: 0; padding-block: 22px; }
+.story-scene h3 { font-size: clamp(24px, 2.5vw, 36px); }
+.scene-reading { font-size: 48px; margin-block: 16px; }
+.scene-description { font-size: 14px; line-height: 1.7; }
+.map-section { border-radius: 20px; overflow: hidden; box-shadow: 0 18px 50px #18394710; }
+.map-detail-block { border-radius: 10px; background: #f1f3eb; padding: 16px; }
+.map-detail-block small, .map-footnote, .map-summary { line-height: 1.7; }
+.trend-card { border-radius: 16px; }
+.telemetry-cockpit-shell { margin-top: 30px; }
+.area-telemetry-block { margin-bottom: 0; }
+.site-footer { justify-content: center; padding-block: 36px; }
+.incident-measurement { font-size: 14px; white-space: nowrap; }
+.incident-ref { line-height: 1.7; }
+.incidents-section { border-radius: 18px; }
+.incidents-main-title { letter-spacing: -.045em; }
+@media (max-width: 800px) {
+  .pulse-brief { grid-template-columns: 110px minmax(0, 1fr); padding: 22px; }
+  .score-method { grid-column: 1 / -1; }
+  .observatory-layout { gap: 24px; }
+  .intro-copy h1 { font-size: clamp(45px, 7vw, 60px); }
+  .city-observatory { height: 320px; }
+  .hero-state { font-size: 11px; }
+  .provenance-ribbon { font-size: 10px; }
+}
+@media (max-width: 600px) {
+  .city-observatory { display: none; }
+  .observatory-layout { padding-block: 28px; }
+  .intro-copy h1 { font-size: clamp(46px, 12vw, 68px); }
+  .pulse-brief { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 20px; }
+  .brief-index { border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 16px; }
+  .brief-index strong { font-size: 46px; }
+  .brief-summary > p:not(.eyebrow) { font-size: 15px; }
+  .brief-summary > .brief-impact { font-size: 12px; }
+  .score-method { grid-column: auto; }
+  .edition-label, .brief-index > small, .brief-summary .eyebrow { font-size: 10px; }
+  .section-shell { padding-block: 36px; }
+  .signal-origin, .signal-foot, .provider-link { font-size: 11px; }
+  .area-switcher-bar { margin-inline: 5vw; padding: 16px; }
+}
 .kpi-grid > *,
 .trend-charts-grid > *,
 .story-layout > *,

@@ -17,7 +17,7 @@ const CityMap = dynamic(
 export function WhatsHappening({ data, area }: { data: CityStatusResponse; area?: string }) {
   const root = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const link = data.possibleLinks[0];
+  const link = data.possibleLinks.find((item) => !area || item.area === area);
   const linked = link
     ? link.eventIds
         .map((id) => data.mapEvents.find((event) => event.id === id))
@@ -95,11 +95,12 @@ export function WhatsHappening({ data, area }: { data: CityStatusResponse; area?
       <div className="story-layout" ref={root}>
         <div className="story-map">
           <CityMap
+            key={`${data.mode}-${area ?? "replay"}`}
             events={data.mapEvents}
             status={data.status}
             possibleLink={link}
             activeSource={activeSource}
-            activeArea={activeEvent?.area}
+            activeArea={area ?? activeEvent?.area}
             mode={data.mode}
             at={data.updatedAt}
           />
@@ -127,6 +128,8 @@ export function WhatsHappening({ data, area }: { data: CityStatusResponse; area?
               <h3>
                 {event.source === "weather"
                   ? "Rain, in the picture."
+                  : event.source === "air_quality"
+                    ? "The air around you."
                   : event.source === "local_report"
                     ? "Reports from the area."
                     : "Movement through the city."}
@@ -140,11 +143,13 @@ export function WhatsHappening({ data, area }: { data: CityStatusResponse; area?
                   ? `${event.type} reports`
                   : event.source === "transport"
                     ? "Average transport delay"
-                    : "Modelled rainfall"}{" "}
+                    : event.source === "air_quality"
+                      ? "Modelled US air quality index"
+                      : "Modelled rainfall"}{" "}
                 in {event.area}.
               </p>
               <span className="scene-tag">
-                {link
+                {link?.eventIds.includes(event.id)
                   ? "Higher than the recent baseline"
                   : data.mode === "replay"
                     ? "Simulated scenario reading"

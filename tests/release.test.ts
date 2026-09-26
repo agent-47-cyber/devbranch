@@ -3,6 +3,16 @@ import assert from "node:assert/strict";
 import { analyzeStatus, getReplayStatus } from "../lib/status";
 import { getReplayEvents, getReplaySteps } from "../lib/replay";
 
+test("missing neighbourhood readings never borrow another area's data", () => {
+  const at = getReplaySteps(2)[5].at;
+  const events = getReplayEvents(5, 2).filter((event) => event.area === "Malviya Nagar");
+  const result = analyzeStatus("replay", [
+    { source: "weather", status: "simulated", updatedAt: at, events: events.filter((e) => e.source === "weather") },
+  ], [], at, "Vaishali Nagar");
+  assert.ok(Object.values(result.current).every((event) => event === null));
+  assert.ok(result.mapEvents.length > 0, "Other neighbourhoods remain available on the map");
+});
+
 test("old synthetic weather cannot contaminate live analysis or charts", () => {
   const at = getReplaySteps(2)[5].at;
   const replay = getReplayEvents(5, 2);

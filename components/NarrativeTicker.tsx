@@ -40,7 +40,7 @@ function buildTicker(data: CityStatusResponse): TickerItem[] {
   for (const update of data.recentUpdates.slice(-4)) {
     items.push({
       id: `update-${update.id}`,
-      text: `${update.title} · ${update.detail}`,
+      text: `${data.mode === "replay" || update.source === "transport" || update.source === "local_report" ? "SIMULATED · " : ""}${update.title} · ${update.detail}`,
       type: "update",
     });
   }
@@ -84,6 +84,7 @@ export function NarrativeTicker({ data }: { data: CityStatusResponse }) {
             <span
               key={`${item.id}-${i}`}
               className={`ticker-item ticker-${item.type}`}
+              aria-hidden={i >= items.length ? true : undefined}
             >
               {item.text}
               <i className="ticker-separator">◆</i>
